@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "144027523071",
+    "project_id": "jobder-e2685",
+    "storage_bucket": "jobder-e2685.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:144027523071:android:44e69df9d68d9c3915b9ca",
+        "android_client_info": {
+          "package_name": "com.example.jobder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvj1oF1RTTKQQxghNebsUpcBDq_miwZG0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
