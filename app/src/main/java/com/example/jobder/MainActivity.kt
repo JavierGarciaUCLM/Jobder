@@ -1,4 +1,6 @@
 package com.example.jobder
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,8 +17,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -52,6 +52,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -66,7 +67,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.navigation.NavController
+import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 
+class AppViewModel : ViewModel() {
+    var isDarkMode = mutableStateOf(false) // Estado para modo oscuro
+}
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,9 +107,17 @@ fun GreetingPreview() {
         Greeting("Android")
     }
 }
+/***************************** LoginScreen *****************************/
 @Composable
-fun LoginScreen(language: String,navController: NavHostController) {
-    Box(modifier = Modifier.fillMaxSize()) {
+fun LoginScreen(language: String,navController: NavHostController,appViewModel: AppViewModel) {
+    val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
+    // Fondo basado en el modo oscuro
+    val backgroundModifier = if (isDarkMode) {
+        Modifier.fillMaxSize().background(Color.Gray)
+    } else {
+        Modifier.fillMaxSize()
+    }
+    Box(modifier = backgroundModifier) {
         val loginText = when (language) {
             "English" -> "Log in"
             "Français" -> "Se connecter"
@@ -126,6 +141,20 @@ fun LoginScreen(language: String,navController: NavHostController) {
                 .align(Alignment.TopCenter)
                 .padding(top = 50.dp)
         )
+        // Botón de cambio de modo oscuro
+        IconButton(
+            onClick = { appViewModel.isDarkMode.value = !isDarkMode }, // Cambia el modo oscuro
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(16.dp)
+        ) {
+            val icon = if (isDarkMode) {
+                painterResource(id = R.drawable.ic_sun) // Icono de sol
+            } else {
+                painterResource(id = R.drawable.ic_moon) // Icono de luna
+            }
+            Image(painter = icon, contentDescription = null)
+        }
 
         // Botón de Log in
         Button(
@@ -141,6 +170,7 @@ fun LoginScreen(language: String,navController: NavHostController) {
         }
     }
 }
+/***************************** LanguageMenu *****************************/
 @Composable
 fun LanguageMenu(navController: NavController, onLanguageSelected: (String) -> Unit) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -196,8 +226,10 @@ fun LanguageMenu(navController: NavController, onLanguageSelected: (String) -> U
 fun MainScreen() {
     AppNavigation()
 }
+/***************************** AppNavigation *****************************/
 @Composable
 fun AppNavigation() {
+    val appViewModel: AppViewModel = viewModel() // Obtener el ViewModel
     var selectedLanguage by remember { mutableStateOf<String?>(null) }
     // Crea el controlador de navegación
     val navController = rememberNavController()
@@ -212,7 +244,7 @@ fun AppNavigation() {
         }
         composable("login_screen") {
             if (selectedLanguage != null) {
-                LoginScreen(language = selectedLanguage!!, navController)
+                LoginScreen(language = selectedLanguage!!, navController,appViewModel)
             } else {
                 // Redirigir al menú de idiomas si no se ha seleccionado un idioma
                 navController.navigate("language_menu") {
@@ -222,7 +254,7 @@ fun AppNavigation() {
         }
         composable("new_login_screen") {
             if (selectedLanguage != null) {
-                NewLoginScreen(language = selectedLanguage!!, navController)
+                NewLoginScreen(language = selectedLanguage!!, navController,appViewModel)
             } else {
                 navController.navigate("language_menu") {
                     popUpTo("language_menu") { inclusive = true } // Limpia la pila de navegación
@@ -231,8 +263,11 @@ fun AppNavigation() {
         }
     }
 }
+/***************************** NewLoginScreen *****************************/
 @Composable
-fun NewLoginScreen(language: String,navController: NavHostController) {
+fun NewLoginScreen(language: String,navController: NavHostController,appViewModel: AppViewModel) {
+
+    val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
     // Variables para almacenar el correo electrónico y la contraseña
     var email by remember { mutableStateOf("") }
     val emailText = when (language) {
@@ -283,10 +318,14 @@ fun NewLoginScreen(language: String,navController: NavHostController) {
     // Definir colores
     val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
     val buttonColor = Color(0xFF0277BD)     // Color azul oscuro para el botón
+// Fondo basado en el modo oscuro
+    val backgroundModifier = if (isDarkMode) {
+        Modifier.fillMaxSize().background(Color.Gray)
+    } else {
+        Modifier.fillMaxSize().background(backgroundColor)
+    }
 
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(backgroundColor)) {
+    Box(modifier = backgroundModifier) {
 
         // Imagen de fondo de un edificio (debes colocar tu imagen en /res/drawable)
         Image(
@@ -294,6 +333,16 @@ fun NewLoginScreen(language: String,navController: NavHostController) {
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
+        )
+        // Rectángulo superpuesto
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    if (isDarkMode) Color.Black.copy(alpha = 0.5f) else Color.White.copy(
+                        alpha = 0.5f
+                    )
+                )
         )
 
         // Logo de la app en la parte superior
@@ -358,7 +407,28 @@ fun NewLoginScreen(language: String,navController: NavHostController) {
             )
 
             Spacer(modifier = Modifier.height(20.dp))
-
+            // Botón de cambio de modo oscuro
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                IconButton(
+                    onClick = {
+                        appViewModel.isDarkMode.value = !isDarkMode
+                    }, // Cambia el modo oscuro
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                ) {
+                    val icon = if (isDarkMode) {
+                        painterResource(id = R.drawable.ic_sun) // Icono de sol
+                    } else {
+                        painterResource(id = R.drawable.ic_moon) // Icono de luna
+                    }
+                    Image(painter = icon, contentDescription = null)
+                }
+            }
             // Botón de Iniciar Sesión
             Button(
                 onClick = { /* Acción de inicio de sesión */ },
@@ -375,21 +445,29 @@ fun NewLoginScreen(language: String,navController: NavHostController) {
                 modifier = Modifier.padding(top = 10.dp),
                 textAlign = TextAlign.Center
             )
-        }
 
-        // Botón para ir a la pantalla de registro (sign-up)
-        Row(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(text = dontHaveAnAccountText, color = Color.White)
-            Spacer(modifier = Modifier.width(4.dp))
-            TextButton(onClick = { /* Navegar a la pantalla de registro */ }) {
-                Text(text = signUpText, color = buttonColor)
+
+            // Botón para ir a la pantalla de registro (sign-up)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = dontHaveAnAccountText, color = Color.White)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    TextButton(onClick = { /* Navegar a la pantalla de registro */ }) {
+                        Text(text = signUpText, color = buttonColor)
+                    }
+                }
             }
         }
     }
 }
+
 
