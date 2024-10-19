@@ -1,7 +1,7 @@
 package ui.screens
 
 import androidx.compose.runtime.Composable
-import com.example.jobder.AppNavigation
+import ui.AppNavigation
 
 @Composable
 fun MainScreen() {

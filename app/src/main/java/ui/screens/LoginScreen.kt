@@ -17,8 +17,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.jobder.AppViewModel
 import com.example.jobder.R
+import viewmodel.AppViewModel
 
 /***************************** LoginScreen *****************************/
 @Composable

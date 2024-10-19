@@ -36,7 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.jobder.AppViewModel
+import viewmodel.AppViewModel
+import com.example.jobder.R
 
 /***************************** NewLoginScreen *****************************/
 @Composable
