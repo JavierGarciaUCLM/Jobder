@@ -109,7 +109,7 @@ fun LoginScreen(language: String) {
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 50.dp)
         ) {
-            Text("Log in")
+            Text(loginText)
         }
     }
 }
