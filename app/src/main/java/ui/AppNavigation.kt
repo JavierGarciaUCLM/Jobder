@@ -25,10 +25,10 @@ fun AppNavigation() {
     // Define el gráfico de navegación
     NavHost(navController = navController, startDestination = "language_menu") {
         composable("language_menu") { // Agregar el menú de idiomas como una pantalla
-            LanguageMenu(navController) { language ->
+            LanguageMenu(navController, { language ->
                 selectedLanguage = language
                 navController.navigate("login_screen") // Navegar a la pantalla de inicio de sesión
-            }
+            },appViewModel)
         }
         composable("login_screen") {
             if (selectedLanguage != null) {

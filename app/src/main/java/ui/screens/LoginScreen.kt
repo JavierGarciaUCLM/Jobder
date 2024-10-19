@@ -44,10 +44,24 @@ fun LoginScreen(language: String, navController: NavHostController, appViewModel
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
         )
-
+        // Rectángulo superpuesto
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    if (isDarkMode) Color.Black.copy(alpha = 0.5f) else Color.White.copy(
+                        alpha = 0.5f
+                    )
+                )
+        )
         // Logo
+        val logo = if (isDarkMode) {
+            painterResource(id = R.drawable.img) // Logo en modo oscuro
+        } else {
+            painterResource(id = R.drawable.light_mode_icon) // Logo en modo claro
+        }
         Image(
-            painter = painterResource(id = R.drawable.img),
+            painter = logo,
             contentDescription = null,
             modifier = Modifier
                 .size(100.dp)

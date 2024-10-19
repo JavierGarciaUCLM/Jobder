@@ -2,6 +2,7 @@ package ui.screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -122,8 +123,13 @@ fun NewLoginScreen(language: String, navController: NavHostController, appViewMo
         )
 
         // Logo de la app en la parte superior
+        val logo = if (isDarkMode) {
+            painterResource(id = R.drawable.img) // Logo en modo oscuro
+        } else {
+            painterResource(id = R.drawable.light_mode_icon) // Logo en modo claro
+        }
         Image(
-            painter = painterResource(id = R.drawable.img),
+            painter = logo,
             contentDescription = null,
             modifier = Modifier
                 .size(100.dp)
