@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import viewmodel.AppViewModel
 import com.example.jobder.R
+import ui.utils.getTranslation
 
 /***************************** NewLoginScreen *****************************/
 @Composable
@@ -47,49 +48,9 @@ fun NewLoginScreen(language: String, navController: NavHostController, appViewMo
     val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
     // Variables para almacenar el correo electrónico y la contraseña
     var email by remember { mutableStateOf("") }
-    val emailText = when (language) {
-        "English" -> "email"
-        "Français" -> "courriel"
-        "Español" -> " correo electrónico"
-        else -> "Log in"
-    }
+
     var password by remember { mutableStateOf("") }
-    val passwordText = when (language) {
-        "English" -> "Password"
-        "Français" -> "Mot de passe"
-        "Español" -> "Contraseña"
-        else -> "Log in"
-    }
-    val welcomeText = when (language) {
-        "English" -> "Welcome to Jobder"
-        "Français" -> "Bienvenue à Jobder"
-        "Español" -> "Bienvenido a Jobder"
-        else -> "Log in"
-    }
-    val loginText = when (language) {
-        "English" -> "Log in"
-        "Français" -> "Se connecter"
-        "Español" -> "Iniciar Sesión"
-        else -> "Log in"
-    }
-    val forgotPasswordText = when (language) {
-        "English" -> "Forgot password?"
-        "Français" -> "Mot de passe oublié ?"
-        "Español" -> "¿Olvidaste tu contraseña?"
-        else -> "Log in"
-    }
-    val dontHaveAnAccountText = when (language) {
-        "English" -> "Don't have an account?"
-        "Français" -> "Vous n'avez pas de compte ?"
-        "Español" -> "¿No tienes una cuenta?"
-        else -> "Log in"
-    }
-    val signUpText = when (language) {
-        "English" -> "Sign up"
-        "Français" -> "S'inscrire"
-        "Español" -> "Registrarse"
-        else -> "Log in"
-    }
+
 
 
     // Definir colores
@@ -146,7 +107,7 @@ fun NewLoginScreen(language: String, navController: NavHostController, appViewMo
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = welcomeText,
+                text = getTranslation("welcome_to_jobder",language),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White,
@@ -163,7 +124,7 @@ fun NewLoginScreen(language: String, navController: NavHostController, appViewMo
                     .padding(16.dp),
                 decorationBox = { innerTextField ->
                     if (email.isEmpty()) {
-                        Text(text = emailText, color = Color.Gray)
+                        Text(text = getTranslation("email",language), color = Color.Gray)
                     }
                     innerTextField()
                 }
@@ -182,7 +143,7 @@ fun NewLoginScreen(language: String, navController: NavHostController, appViewMo
                 visualTransformation = PasswordVisualTransformation(),
                 decorationBox = { innerTextField ->
                     if (password.isEmpty()) {
-                        Text(text = passwordText, color = Color.Gray)
+                        Text(text = getTranslation("password",language), color = Color.Gray)
                     }
                     innerTextField()
                 }
@@ -213,16 +174,16 @@ fun NewLoginScreen(language: String, navController: NavHostController, appViewMo
             //}
             // Botón de Iniciar Sesión
             Button(
-                onClick = { /* Acción de inicio de sesión */ },
+                onClick = { navController.navigate("welcome_screen")},
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(buttonColor)
             ) {
-                Text(text = loginText, color = Color.White)
+                Text(text = getTranslation("login",language), color = Color.White)
             }
 
             // Enlace de "Forgot Password"
             Text(
-                text = forgotPasswordText,
+                text = getTranslation("forgot_password",language),
                 color = Color.White,
                 modifier = Modifier.padding(top = 10.dp),
                 textAlign = TextAlign.Center
@@ -241,10 +202,10 @@ fun NewLoginScreen(language: String, navController: NavHostController, appViewMo
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.Center
             ) {
-                Text(text = dontHaveAnAccountText, color = Color.White)
+                Text(text = getTranslation("dont_have_an_account",language), color = Color.White)
                 Spacer(modifier = Modifier.width(4.dp))
                 TextButton(onClick = { /* Navegar a la pantalla de registro */ }) {
-                    Text(text = signUpText, color = buttonColor)
+                    Text(text = getTranslation("sign_up",language), color = buttonColor)
                 }
             }
             // }

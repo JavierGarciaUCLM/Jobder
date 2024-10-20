@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.jobder.R
+import ui.utils.getTranslation
 import viewmodel.AppViewModel
 
 /***************************** LoginScreen *****************************/
@@ -31,12 +32,7 @@ fun LoginScreen(language: String, navController: NavHostController, appViewModel
         Modifier.fillMaxSize()
     }
     Box(modifier = backgroundModifier) {
-        val loginText = when (language) {
-            "English" -> "Log in"
-            "Français" -> "Se connecter"
-            "Español" -> "Iniciar Sesión"
-            else -> "Log in"
-        }
+
         // Imagen de fondo
         Image(
             painter = painterResource(id = R.drawable.ohyeah),
@@ -93,7 +89,7 @@ fun LoginScreen(language: String, navController: NavHostController, appViewModel
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 50.dp)
         ) {
-            Text(loginText)
+            Text(getTranslation("login",language))
         }
     }
 }

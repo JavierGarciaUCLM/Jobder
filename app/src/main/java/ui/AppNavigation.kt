@@ -13,6 +13,10 @@ import viewmodel.AppViewModel
 import ui.screens.NewLoginScreen
 import ui.screens.LanguageMenu
 import ui.screens.LoginScreen
+import ui.screens.MainScreen
+import ui.screens.SwipeableCardsScreen
+import ui.screens.WelcomeScreen
+import ui.screens.swipe.SwipeableMainScreen
 
 /***************************** AppNavigation *****************************/
 @Composable
@@ -48,6 +52,24 @@ fun AppNavigation() {
                     popUpTo("language_menu") { inclusive = true } // Limpia la pila de navegación
                 }
             }
+        }
+        composable("welcome_screen"){
+            if (selectedLanguage != null) {
+                WelcomeScreen(language = selectedLanguage!!,navController,appViewModel)
+            } else {
+                navController.navigate("language_menu") {
+                    popUpTo("language_menu") { inclusive = true } // Limpia la pila de navegación
+                }
+            }
+        }
+        composable("main"){
+            MainScreen()
+        }
+        composable("swipe"){
+            SwipeableMainScreen()
+        }
+        composable("swipe_screen"){
+            SwipeableCardsScreen()
         }
     }
 }

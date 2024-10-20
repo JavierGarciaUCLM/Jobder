@@ -72,6 +72,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ui.components.Greeting
 import ui.screens.MainScreen
+import ui.screens.SwipeableCardsScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -87,6 +88,7 @@ class MainActivity : ComponentActivity() {
 //                    )
 //                }
                 MainScreen()
+                //SwipeableCardsScreen()
             }
         }
     }
