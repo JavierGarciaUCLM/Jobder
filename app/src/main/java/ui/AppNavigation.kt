@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import viewmodel.AppViewModel
 import ui.screens.NewLoginScreen
-import ui.screens.LanguageMenu
+import ui.screens.LanguageMenuScreen
 import ui.screens.LoginScreen
 import ui.screens.MainScreen
 import ui.screens.SwipeableCardsScreen
@@ -21,54 +21,44 @@ import ui.screens.WelcomeScreen
 /***************************** AppNavigation *****************************/
 @Composable
 fun AppNavigation() {
-    val appViewModel: AppViewModel = viewModel() // Obtener el ViewModel
+    val appViewModel: AppViewModel = viewModel()
     var selectedLanguage by remember { mutableStateOf<String?>(null) }
-    // Crea el controlador de navegación
     val navController = rememberNavController()
 
-    // Define el gráfico de navegación
-    NavHost(navController = navController, startDestination = "language_menu") {
-        composable("language_menu") { // Agregar el menú de idiomas como una pantalla
-            LanguageMenu(navController, { language ->
-                selectedLanguage = language
-                navController.navigate("login_screen") // Navegar a la pantalla de inicio de sesión
-            },appViewModel)
-        }
+    NavHost(navController = navController, startDestination = "language_menu_screen") {
+        composable("language_menu_screen") {
+            // Pasamos el idioma seleccionado como argumento
+            LanguageMenuScreen(
+                appViewModel = appViewModel,
+
+                onLanguageSelected = { language ->
+                    selectedLanguage = language},
+                    navController,
+                    selectedLanguage = selectedLanguage,  // Pasamos el idioma seleccionado
+
+            )    }
+
         composable("login_screen") {
-            if (selectedLanguage != null) {
-                LoginScreen(language = selectedLanguage!!, navController,appViewModel)
-            } else {
-                // Redirigir al menú de idiomas si no se ha seleccionado un idioma
-                navController.navigate("language_menu") {
-                    popUpTo("language_menu") { inclusive = true } // Limpia la pila de navegación
-                }
-            }
+            LoginScreen(language = selectedLanguage ?: "English", navController = navController, appViewModel = appViewModel)
         }
+
         composable("new_login_screen") {
-            if (selectedLanguage != null) {
-                NewLoginScreen(language = selectedLanguage!!, navController,appViewModel)
-            } else {
-                navController.navigate("language_menu") {
-                    popUpTo("language_menu") { inclusive = true } // Limpia la pila de navegación
-                }
-            }
+            NewLoginScreen(language = selectedLanguage ?: "English", navController = navController, appViewModel = appViewModel)
         }
-        composable("welcome_screen"){
-            if (selectedLanguage != null) {
-                WelcomeScreen(language = selectedLanguage!!,navController,appViewModel)
-            } else {
-                navController.navigate("language_menu") {
-                    popUpTo("language_menu") { inclusive = true } // Limpia la pila de navegación
-                }
-            }
+
+        composable("welcome_screen") {
+            WelcomeScreen(language = selectedLanguage ?: "English", navController = navController, appViewModel = appViewModel)
         }
-        composable("main"){
+
+        composable("main") {
             MainScreen()
         }
-        composable("swipe_screen"){
+
+        composable("swipe_screen") {
             SwipeableCardsScreen()
         }
-        composable("swipe_screen_person"){
+
+        composable("swipe_screen_person") {
             SwipeableCardsScreenPerson()
         }
     }
