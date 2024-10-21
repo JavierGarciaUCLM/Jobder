@@ -117,7 +117,7 @@ fun WelcomeScreen(language: String,navController: NavHostController, appViewMode
 
                 // Botón de "Join as a Company"
                 Button(
-                    onClick = { /* Acción para unirse como empresa */ },
+                    onClick = { navController.navigate("swipe_screen_person")},
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),

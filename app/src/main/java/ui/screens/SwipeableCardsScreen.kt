@@ -24,7 +24,8 @@ fun SwipeableCardsScreen() {
         R.drawable.company1,
         R.drawable.company2,
         R.drawable.company3,
-        R.drawable.company4
+        R.drawable.company4,
+        R.drawable.company5
     ) }
     val coroutineScope = rememberCoroutineScope()
 
