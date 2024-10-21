@@ -15,8 +15,8 @@ import ui.screens.LanguageMenu
 import ui.screens.LoginScreen
 import ui.screens.MainScreen
 import ui.screens.SwipeableCardsScreen
+import ui.screens.SwipeableCardsScreenPerson
 import ui.screens.WelcomeScreen
-import ui.screens.swipe.SwipeableMainScreen
 
 /***************************** AppNavigation *****************************/
 @Composable
@@ -65,11 +65,11 @@ fun AppNavigation() {
         composable("main"){
             MainScreen()
         }
-        composable("swipe"){
-            SwipeableMainScreen()
-        }
         composable("swipe_screen"){
             SwipeableCardsScreen()
+        }
+        composable("swipe_screen_person"){
+            SwipeableCardsScreenPerson()
         }
     }
 }
