@@ -11,12 +11,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import viewmodel.AppViewModel
 import ui.screens.NewLoginScreen
-import ui.screens.LanguageMenuScreen
+//import ui.screens.LanguageMenuScreen
 import ui.screens.LoginScreen
 import ui.screens.MainScreen
 import ui.screens.SwipeableCardsScreen
 import ui.screens.SwipeableCardsScreenPerson
 import ui.screens.WelcomeScreen
+import ui.screens.myClasLanguageMenuScreen
 
 /***************************** AppNavigation *****************************/
 @Composable
@@ -28,7 +29,8 @@ fun AppNavigation() {
     NavHost(navController = navController, startDestination = "language_menu_screen") {
         composable("language_menu_screen") {
             // Pasamos el idioma seleccionado como argumento
-            LanguageMenuScreen(
+            val myClassICreated = myClasLanguageMenuScreen()
+            myClassICreated.LanguageMenuScreen(
                 appViewModel = appViewModel,
 
                 onLanguageSelected = { language ->
