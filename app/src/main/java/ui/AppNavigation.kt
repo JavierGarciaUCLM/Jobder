@@ -1,6 +1,10 @@
 package ui
 
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -18,6 +22,7 @@ import ui.screens.SwipeableCardsScreen
 import ui.screens.SwipeableCardsScreenPerson
 import ui.screens.WelcomeScreen
 import ui.screens.myClasLanguageMenuScreen
+import java.util.Locale
 
 /***************************** AppNavigation *****************************/
 @Composable
@@ -28,8 +33,34 @@ fun AppNavigation() {
 
     NavHost(navController = navController, startDestination = "language_menu_screen") {
         composable("language_menu_screen") {
-            // Pasamos el idioma seleccionado como argumento
+            var currentIndex by remember {mutableStateOf(0)}
+            val languages = listOf("English", "Français", "Español")
             val myClassICreated = myClasLanguageMenuScreen()
+            // Pasamos el idioma seleccionado como argumento
+             var tts by remember {mutableStateOf<TextToSpeech?>(null)}
+            val ttsState = remember { mutableStateOf(tts) }
+            LaunchedEffect(Unit) {
+                Log.d("AppNavigation", "Initializing TextToSpeech")
+                tts = TextToSpeech(navController.context) { status ->
+                    if (status == TextToSpeech.SUCCESS) {
+                        Log.d("AppNavigation", "TextToSpeech initialized successfully")
+                        setTTSLanguage( languages[currentIndex],)
+                    } else {
+                        Log.e("AppNavigation", "TextToSpeech initialization failed")
+                    }
+                }
+            }
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    tts?.let {
+                        Log.d("AppNavigation", "Shutting down TextToSpeech")
+                        it.stop()
+                        it.shutdown()
+                    }
+                }
+            }
+
             myClassICreated.LanguageMenuScreen(
                 appViewModel = appViewModel,
 
@@ -37,7 +68,7 @@ fun AppNavigation() {
                     selectedLanguage = language},
                     navController,
                     selectedLanguage = selectedLanguage,  // Pasamos el idioma seleccionado
-
+                    tts = ttsState.value
             )    }
 
         composable("login_screen") {
@@ -64,4 +95,19 @@ fun AppNavigation() {
             SwipeableCardsScreenPerson()
         }
     }
+}
+
+fun setTTSLanguage(language: String, tts: TextToSpeech) {
+
+        val locale = when (language) {
+            "English" -> Locale.ENGLISH
+            "Français" -> Locale.FRENCH
+            "Español" -> Locale("es", "ES")
+            else -> Locale.ENGLISH
+        }
+        val result = tts.setLanguage(locale)
+        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+            Log.e("TTS", "Idioma no soportado")
+        }
+
 }
