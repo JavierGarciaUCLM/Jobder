@@ -1,15 +1,21 @@
 package ui.screens
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
+import androidx.annotation.OptIn
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.ExperimentalGetImage
+import androidx.camera.core.ImageAnalysis
+import androidx.camera.core.ImageProxy
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -17,73 +23,38 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.example.jobder.R
-import kotlinx.coroutines.delay
-import ui.utils.BaseActivity
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetectorOptions
 import viewmodel.AppViewModel
-import android.speech.tts.TextToSpeech
-import android.util.Log
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import java.util.Locale
+import java.util.concurrent.Executors
 
-class myClasLanguageMenuScreen : BaseActivity(), TextToSpeech.OnInitListener {
-    private lateinit var tts: TextToSpeech
-    private var currentIndex by mutableStateOf(0)
-    private val languages = listOf("English", "Français", "Español")
-
-//    override fun onCreate(savedInstanceState: Bundle?) {
-//        super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
-//        tts = TextToSpeech(this, this)
-//        setContent {
-//            JobderTheme {
-//                val ttsState = remember { mutableStateOf(tts) }
-//                LanguageMenuScreen(
-//                    appViewModel = AppViewModel(),
-//                    onLanguageSelected = { language -> setTTSLanguage(language) },
-//                    navController = NavHostController(this),
-//                    selectedLanguage = languages[currentIndex],
-//                    tts = ttsState.value
-//                )
-//            }
-//        }
-//    }
-
-    private fun setTTSLanguage(language: String) {
-        val locale = when (language) {
-            "English" -> Locale.ENGLISH
-            "Français" -> Locale.FRENCH
-            "Español" -> Locale("es", "ES")
-            else -> Locale.ENGLISH
+class myClasLanguageMenuScreen : ComponentActivity() {
+    private val MAX_BLINK_INTERVAL = 1000L // 1 segundo
+    private var isNavigating = false // Variable para evitar múltiples navegaciones
+    private lateinit var selectedLanguage:String
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            LanguageMenuScreen(
+                appViewModel = AppViewModel(),
+                onLanguageSelected = { language ->
+                    selectedLanguage = language
+                    Log.d("AppNavigation", "Language selected: $language") },
+                navController = rememberNavController(),
+                selectedLanguage = null
+            )
         }
-        val result = tts.setLanguage(locale)
-        if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-            Log.e("TTS", "Idioma no soportado")
-        }
-    }
-
-    override fun onInit(status: Int) {
-        if (status == TextToSpeech.SUCCESS) {
-            setTTSLanguage(languages[currentIndex])
-        } else {
-            Log.e("TTS", "Inicialización fallida")
-        }
-    }
-
-    override fun onDestroy() {
-        if (this::tts.isInitialized) {
-            tts.stop()
-            tts.shutdown()
-        }
-        super.onDestroy()
     }
 
     @Composable
@@ -91,21 +62,16 @@ class myClasLanguageMenuScreen : BaseActivity(), TextToSpeech.OnInitListener {
         appViewModel: AppViewModel,
         onLanguageSelected: (String) -> Unit,
         navController: NavHostController,
-        selectedLanguage: String?,
-        tts: TextToSpeech
+        selectedLanguage: String?
     ) {
         val isDarkMode = appViewModel.isDarkMode.value
         val backgroundColor = Color(0xFFE0F7FA)
         val buttonColor = Color(0xFF0277BD)
-        val backgroundModifier = if (isDarkMode) {
-            Modifier.fillMaxSize().background(Color.Gray)
-        } else {
-            Modifier.fillMaxSize().background(backgroundColor)
-        }
+        val context = LocalContext.current
+        val executor = Executors.newSingleThreadExecutor()
+        var selectedButtonIndex by remember { mutableStateOf(0) }
 
-        var offsetX by remember { mutableStateOf(0f) }
-        var swipeEnabled by remember { mutableStateOf(true) }
-
+        // Fondo según el modo de tema
         Box(modifier = Modifier.fillMaxSize()) {
             Image(
                 painter = painterResource(id = R.drawable.ohyeah),
@@ -114,125 +80,138 @@ class myClasLanguageMenuScreen : BaseActivity(), TextToSpeech.OnInitListener {
                 contentScale = ContentScale.Crop
             )
 
-            val logo = if (isDarkMode) {
-                painterResource(id = R.drawable.img)
-            } else {
-                painterResource(id = R.drawable.light_mode_icon)
-            }
-            Image(
-                painter = logo,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(100.dp)
-                    .align(Alignment.TopCenter)
-                    .padding(top = 50.dp)
-            )
-
+            // Aquí definimos los botones de idiomas
             Column(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(16.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures(
-                            onDoubleTap = { performButtonClick(tts) }
-                        )
-                    }
-                    .pointerInput(Unit) {
-                        detectTransformGestures { _, pan, _, _ ->
-                            if (swipeEnabled) {
-                                if (pan.x > 0) {
-                                    offsetX = 1f
-                                    navigateToNextButton()
-                                    swipeEnabled = false
-                                    Log.d("Swipe", "Swipe a la derecha detectado")
-                                } else {
-                                    offsetX = -1f
-                                    navigateToPreviousButton()
-                                    swipeEnabled = false
-                                    Log.d("Swipe", "Swipe a la izquierda detectado")
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = {
+                        onLanguageSelected("English")
+                        navController.navigate("login_screen")
+                    },
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .semantics { contentDescription = "Select English language" },
+                    border = if (selectedButtonIndex == 0) BorderStroke(2.dp, Color.Blue) else null,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("English")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        onLanguageSelected("Français")
+                        navController.navigate("login_screen")
+                    },
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .semantics { contentDescription = "Select French language" } ,
+                    border = if (selectedButtonIndex == 1) BorderStroke(2.dp, Color.Blue) else null,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Français")
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        onLanguageSelected("Español")
+                        navController.navigate("login_screen")
+                    },
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .semantics { contentDescription = "Select Spanish language" },
+                    border = if (selectedButtonIndex == 2) BorderStroke(2.dp, Color.Blue) else null,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Español")
+                }
+            }
+
+            // Configuración de la cámara
+            DisposableEffect(Unit) {
+                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+
+                cameraProviderFuture.addListener({
+                    val cameraProvider = cameraProviderFuture.get()
+                    val options = FaceDetectorOptions.Builder()
+                        .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_FAST)
+                        .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
+                        .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_ALL)
+                        .build()
+
+                    val detector = FaceDetection.getClient(options)
+                    val imageAnalyzer = ImageAnalysis.Builder()
+                        .build()
+                        .also {
+                            it.setAnalyzer(executor, { imageProxy ->
+                                processImageProxy(detector, imageProxy) { blinkDetected, smileDetected ->
+                                    if (blinkDetected) {
+                                        selectedButtonIndex = (selectedButtonIndex + 1) % 3
+                                    }
+                                    if (smileDetected && !isNavigating) {
+                                        isNavigating = true
+                                        val intent = Intent(this@myClasLanguageMenuScreen, LoginScreen::class.java)
+                                        startActivity(intent)
+                                    }
                                 }
                             }
                         }
-                    },
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                languages.forEachIndexed { index, language ->
-                    Button(
-                        onClick = {
-                            onLanguageSelected(language)
-                            navController.navigate("login_screen")
-                        },
-                        modifier = Modifier
-                            .padding(8.dp)
-                            .then(
-                                if (index == currentIndex) {
-                                    Modifier.border(2.dp, Color.Blue)
-                                } else {
-                                    Modifier
-                                }
-                            )
-                            .semantics { contentDescription = "Select $language language" }
-                    ) {
-                        Text(language)
+
+
+
+                    try {
+                        cameraProvider.unbindAll()
+                        cameraProvider.bindToLifecycle(this@myClasLanguageMenuScreen, cameraSelector, imageAnalyzer)
+                    } catch (exc: Exception) {
+                        Log.e("CameraXApp", "Error al iniciar la cámara", exc)
                     }
+                }, ContextCompat.getMainExecutor(context))
+            }
+
+        }
+    }
+
+    @OptIn(ExperimentalGetImage::class)
+    private fun processImageProxy(
+        detector: com.google.mlkit.vision.face.FaceDetector,
+        imageProxy: ImageProxy,
+        onGestureDetected: @Composable (Boolean, Boolean) -> Unit
+    ) {
+        val mediaImage = imageProxy.image
+        if (mediaImage != null) {
+            val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+            detector.process(image)
+                .addOnSuccessListener { faces ->
+                    var blinkDetected = false
+                    var smileDetected = false
+                    for (face in faces) {
+                        face.smilingProbability?.let { smileProb ->
+                            if (smileProb > 0.5) {
+                                smileDetected = true
+                            }
+                        }
+                        face.leftEyeOpenProbability?.let { leftEyeProb ->
+                            face.rightEyeOpenProbability?.let { rightEyeProb ->
+                                if (leftEyeProb < 0.5 && rightEyeProb < 0.5) {
+                                    blinkDetected = true
+                                }
+                            }
+                        }
+                    }
+                    onGestureDetected(blinkDetected, smileDetected)
                 }
-            }
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        if (isDarkMode) Color.Black.copy(alpha = 0.5f) else Color.White.copy(
-                            alpha = 0.5f
-                        )
-                    )
-            )
-
-            IconButton(
-                onClick = { appViewModel.isDarkMode.value = !isDarkMode },
-                modifier = Modifier
-                    .padding(16.dp)
-                    .semantics { contentDescription = if (isDarkMode) "Switch to light mode" else "Switch to dark mode" }
-            ) {
-                val icon = if (isDarkMode) {
-                    painterResource(id = R.drawable.ic_sun)
-                } else {
-                    painterResource(id = R.drawable.ic_moon)
+                .addOnFailureListener { e ->
+                    Log.e("FaceDetection", "Error al detectar la cara", e)
                 }
-                Image(painter = icon, contentDescription = null)
-            }
-        }
-
-        val animatedOffsetX by animateFloatAsState(
-            targetValue = offsetX,
-            animationSpec = tween(durationMillis = 500)
-        )
-
-        LaunchedEffect(swipeEnabled) {
-            if (!swipeEnabled) {
-                delay(1000L)
-                swipeEnabled = true
-                Log.d("Swipe", "Swipe habilitado nuevamente")
-            }
+                .addOnCompleteListener {
+                    imageProxy.close()  // Cierra imageProxy al final del procesamiento
+                }
+        } else {
+            imageProxy.close()  // Cierra imageProxy incluso si mediaImage es nulo
         }
     }
-
-    private fun navigateToPreviousButton() {
-        if (currentIndex > 0) {
-            currentIndex--
-            setTTSLanguage(languages[currentIndex])
-        }
     }
-
-    private fun navigateToNextButton() {
-        if (currentIndex < languages.size - 1) {
-            currentIndex++
-            setTTSLanguage(languages[currentIndex])
-        }
-    }
-
-    private fun performButtonClick(tts: TextToSpeech) {
-        setTTSLanguage(languages[currentIndex])
-        tts.speak("Idioma seleccionado: ${languages[currentIndex]}", TextToSpeech.QUEUE_FLUSH, null, null)
-    }
-}

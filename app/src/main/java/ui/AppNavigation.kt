@@ -33,43 +33,24 @@ fun AppNavigation() {
 
     NavHost(navController = navController, startDestination = "language_menu_screen") {
         composable("language_menu_screen") {
-            var currentIndex by remember {mutableStateOf(0)}
-            val languages = listOf("English", "Français", "Español")
+
+            //val myClassICreated = myClasLanguageMenuScreen()
+            var tts by remember { mutableStateOf<TextToSpeech?>(null) }
+            //var currentIndex by remember { mutableStateOf(0) }
+            //val languages = listOf("English", "Français", "Español")
+
             val myClassICreated = myClasLanguageMenuScreen()
-            // Pasamos el idioma seleccionado como argumento
-             var tts by remember {mutableStateOf<TextToSpeech?>(null)}
-            val ttsState = remember { mutableStateOf(tts) }
-            LaunchedEffect(Unit) {
-                Log.d("AppNavigation", "Initializing TextToSpeech")
-                tts = TextToSpeech(navController.context) { status ->
-                    if (status == TextToSpeech.SUCCESS) {
-                        Log.d("AppNavigation", "TextToSpeech initialized successfully")
-                        setTTSLanguage( languages[currentIndex],)
-                    } else {
-                        Log.e("AppNavigation", "TextToSpeech initialization failed")
-                    }
-                }
-            }
-
-            DisposableEffect(Unit) {
-                onDispose {
-                    tts?.let {
-                        Log.d("AppNavigation", "Shutting down TextToSpeech")
-                        it.stop()
-                        it.shutdown()
-                    }
-                }
-            }
-
             myClassICreated.LanguageMenuScreen(
                 appViewModel = appViewModel,
-
                 onLanguageSelected = { language ->
-                    selectedLanguage = language},
-                    navController,
-                    selectedLanguage = selectedLanguage,  // Pasamos el idioma seleccionado
-                    tts = ttsState.value
-            )    }
+                    selectedLanguage = language
+                    Log.d("AppNavigation", "Language selected: $language")
+                },
+                navController = navController,
+                selectedLanguage = selectedLanguage
+            )
+
+        }
 
         composable("login_screen") {
             LoginScreen(language = selectedLanguage ?: "English", navController = navController, appViewModel = appViewModel)
