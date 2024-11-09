@@ -1,5 +1,6 @@
 package ui.screens
 
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -22,7 +23,7 @@ import ui.utils.getTranslation
 import viewmodel.AppViewModel
 
 /***************************** LoginScreen *****************************/
-public class LoginScreen {
+public class LoginScreen:ComponentActivity() {
     @Composable
     fun LoginScreen(
         language: String,

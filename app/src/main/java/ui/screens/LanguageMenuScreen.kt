@@ -39,101 +39,101 @@ import com.google.mlkit.vision.face.FaceDetectorOptions
 import viewmodel.AppViewModel
 import java.util.concurrent.Executors
 
-class myClasLanguageMenuScreen : ComponentActivity() {
+class myClasLanguageMenuScreen(
+    language: String,
+    navController: NavHostController,
+    appViewModel: AppViewModel
+) : ComponentActivity() {
     private val MAX_BLINK_INTERVAL = 1000L // 1 segundo
     private var isNavigating = false // Variable para evitar múltiples navegaciones
     private lateinit var selectedLanguage:String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            LanguageMenuScreen(
-                appViewModel = AppViewModel(),
-                onLanguageSelected = { language ->
-                    selectedLanguage = language
-                    Log.d("AppNavigation", "Language selected: $language") },
-                navController = rememberNavController(),
-                selectedLanguage = null
-            )
-        }
-    }
+            val navController = rememberNavController()
+            val isDarkMode = appViewModel.isDarkMode.value
+            val backgroundColor = Color(0xFFE0F7FA)
+            val buttonColor = Color(0xFF0277BD)
+            val context = LocalContext.current
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+            val executor = Executors.newSingleThreadExecutor()
+            var selectedButtonIndex by remember { mutableStateOf(0) }
 
-    @Composable
-    fun LanguageMenuScreen(
-        appViewModel: AppViewModel,
-        onLanguageSelected: (String) -> Unit,
-        navController: NavHostController,
-        selectedLanguage: String?
-    ) {
-        val isDarkMode = appViewModel.isDarkMode.value
-        val backgroundColor = Color(0xFFE0F7FA)
-        val buttonColor = Color(0xFF0277BD)
-        val context = LocalContext.current
-        val executor = Executors.newSingleThreadExecutor()
-        var selectedButtonIndex by remember { mutableStateOf(0) }
+            // Fondo según el modo de tema
+            Box(modifier = Modifier.fillMaxSize()) {
+                Image(
+                    painter = painterResource(id = R.drawable.ohyeah),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
 
-        // Fondo según el modo de tema
-        Box(modifier = Modifier.fillMaxSize()) {
-            Image(
-                painter = painterResource(id = R.drawable.ohyeah),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
-            )
-
-            // Aquí definimos los botones de idiomas
-            Column(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Button(
-                    onClick = {
-                        onLanguageSelected("English")
-                        navController.navigate("login_screen")
-                    },
+                // Aquí definimos los botones de idiomas
+                Column(
                     modifier = Modifier
-                        .padding(8.dp)
-                        .semantics { contentDescription = "Select English language" },
-                    border = if (selectedButtonIndex == 0) BorderStroke(2.dp, Color.Blue) else null,
-                    shape = RoundedCornerShape(8.dp)
+                        .fillMaxSize()
+                        //.align(Alignment.Center)
+                        .padding(16.dp),
+                    //horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text("English")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        Button(
+                            onClick = {
+                                onLanguageSelected("English")
+                                navController.navigate("login_screen")
+                            },
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .semantics { contentDescription = "Select English language" },
+                            border = if (selectedButtonIndex == 0) BorderStroke(
+                                2.dp,
+                                Color.Blue
+                            ) else null,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("English")
+                        }
+                        //Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                onLanguageSelected("Français")
+                                navController.navigate("login_screen")
+                            },
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .semantics { contentDescription = "Select French language" },
+                            border = if (selectedButtonIndex == 1) BorderStroke(
+                                2.dp,
+                                Color.Blue
+                            ) else null,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Français")
+                        }
+                        //Spacer(modifier = Modifier.height(16.dp))
+                        Button(
+                            onClick = {
+                                onLanguageSelected("Español")
+                                navController.navigate("login_screen")
+                            },
+                            modifier = Modifier
+                                .padding(8.dp)
+                                .semantics { contentDescription = "Select Spanish language" },
+                            border = if (selectedButtonIndex == 2) BorderStroke(
+                                2.dp,
+                                Color.Blue
+                            ) else null,
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Español")
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        onLanguageSelected("Français")
-                        navController.navigate("login_screen")
-                    },
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .semantics { contentDescription = "Select French language" } ,
-                    border = if (selectedButtonIndex == 1) BorderStroke(2.dp, Color.Blue) else null,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Français")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = {
-                        onLanguageSelected("Español")
-                        navController.navigate("login_screen")
-                    },
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .semantics { contentDescription = "Select Spanish language" },
-                    border = if (selectedButtonIndex == 2) BorderStroke(2.dp, Color.Blue) else null,
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text("Español")
-                }
-            }
-
-            // Configuración de la cámara
-            DisposableEffect(Unit) {
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-                val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
 
                 cameraProviderFuture.addListener({
                     val cameraProvider = cameraProviderFuture.get()
@@ -158,28 +158,29 @@ class myClasLanguageMenuScreen : ComponentActivity() {
                                         startActivity(intent)
                                     }
                                 }
-                            }
+                            })
                         }
 
 
-
+                    val cameraSelector =  CameraSelector.DEFAULT_FRONT_CAMERA
                     try {
                         cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(this@myClasLanguageMenuScreen, cameraSelector, imageAnalyzer)
+                        cameraProvider.bindToLifecycle(
+                            this@myClasLanguageMenuScreen,
+                            cameraSelector,
+                            imageAnalyzer)
                     } catch (exc: Exception) {
                         Log.e("CameraXApp", "Error al iniciar la cámara", exc)
                     }
                 }, ContextCompat.getMainExecutor(context))
             }
-
         }
     }
-
     @OptIn(ExperimentalGetImage::class)
     private fun processImageProxy(
         detector: com.google.mlkit.vision.face.FaceDetector,
         imageProxy: ImageProxy,
-        onGestureDetected: @Composable (Boolean, Boolean) -> Unit
+        onGestureDetected: (Boolean, Boolean) -> Unit
     ) {
         val mediaImage = imageProxy.image
         if (mediaImage != null) {
@@ -191,12 +192,14 @@ class myClasLanguageMenuScreen : ComponentActivity() {
                     for (face in faces) {
                         face.smilingProbability?.let { smileProb ->
                             if (smileProb > 0.5) {
+                                Log.e("FaceDetection", "¡Sonrisa detectada!")
                                 smileDetected = true
                             }
                         }
                         face.leftEyeOpenProbability?.let { leftEyeProb ->
                             face.rightEyeOpenProbability?.let { rightEyeProb ->
                                 if (leftEyeProb < 0.5 && rightEyeProb < 0.5) {
+                                    Log.e("FaceDetection", "¡Parpadeo detectado!")
                                     blinkDetected = true
                                 }
                             }
@@ -210,8 +213,8 @@ class myClasLanguageMenuScreen : ComponentActivity() {
                 .addOnCompleteListener {
                     imageProxy.close()  // Cierra imageProxy al final del procesamiento
                 }
-        } else {
-            imageProxy.close()  // Cierra imageProxy incluso si mediaImage es nulo
         }
     }
     }
+
+

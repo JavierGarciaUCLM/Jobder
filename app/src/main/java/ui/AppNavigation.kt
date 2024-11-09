@@ -39,8 +39,7 @@ fun AppNavigation() {
             //var currentIndex by remember { mutableStateOf(0) }
             //val languages = listOf("English", "Français", "Español")
 
-            val myClassICreated = myClasLanguageMenuScreen()
-            myClassICreated.LanguageMenuScreen(
+            val myClassICreated = myClasLanguageMenuScreen(
                 appViewModel = appViewModel,
                 onLanguageSelected = { language ->
                     selectedLanguage = language
@@ -53,7 +52,8 @@ fun AppNavigation() {
         }
 
         composable("login_screen") {
-            LoginScreen(language = selectedLanguage ?: "English", navController = navController, appViewModel = appViewModel)
+            val myLoginScreen = LoginScreen()
+            myLoginScreen.LoginScreen(language = selectedLanguage ?: "English", navController = navController, appViewModel = appViewModel)
         }
 
         composable("new_login_screen") {
