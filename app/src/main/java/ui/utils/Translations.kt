@@ -39,9 +39,9 @@ val translations = mapOf(
  ),
 
     "welcome_to_jobder" to mapOf(
-        "English" to "Welcome to Jobder",
-        "Français" to "Bienvenue à Jobder",
-        "Español" to "Bienvenido a Jobder"
+        "English" to "Welcome to JobAlba",
+        "Français" to "Bienvenue à JobAlba",
+        "Español" to "Bienvenido a JobAlba"
     ),
     "join_as_a_user" to mapOf(
         "English" to "Join as a user",

@@ -17,6 +17,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -120,7 +121,8 @@ public class LoginScreen:ComponentActivity() {
                         2.dp,
                         Color.Blue
                     ) else null,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.buttonColors(Color(0xFF0277BD))
                 ) {
                     Text(getTranslation("login", language))
                 }

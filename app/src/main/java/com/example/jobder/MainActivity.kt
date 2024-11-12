@@ -1,5 +1,6 @@
 package com.example.jobder
 
+import android.app.Application
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -19,6 +20,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
@@ -29,8 +31,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,35 +54,103 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.selects.select
 import ui.screens.TTSActivity
-import viewmodel.AppViewModel
+import com.example.jobder.AppViewModel
 import java.util.Locale
 import java.util.concurrent.Executors
 
 
 class MainActivity : ComponentActivity() {
+    private var isNavigating = false
+    private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        isNavigating = false
+        // Inicializa el ViewModel usando el contexto de la aplicación
+        appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
+
+
+        //enableEdgeToEdge()
         setContent {
-            val appViewModel = AppViewModel()
+            // Crear instancia de AppViewModel
+            //val appViewModel = remember { AppViewModel() }
+            val isDarkMode by appViewModel.isDarkMode
+            val language by appViewModel.selectedLanguage
+            // Observa el valor de isDarkMode
+            //val isDarkMode by appViewModel.isDarkMode
             val context = LocalContext.current
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            var selectedLanguage = listOf("English","Français","Español")//by remember {mutableStateOf("")}
-            Box(modifier = Modifier.fillMaxSize()) {
+            //var selectedLanguage = listOf("English","Français","Español")//by remember {mutableStateOf("")}
+            // Definir colores
+            val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
+            val buttonColor = Color(0xFF0277BD)     // Color azul oscuro para el botón
+// Fondo basado en el modo oscuro
+            val backgroundModifier = if (isDarkMode) {
+                Modifier.fillMaxSize().background(Color.Gray)
+            } else {
+                Modifier.fillMaxSize().background(backgroundColor)
+            }
+
+            Box(modifier = backgroundModifier) {
                 Image(
                     painter = painterResource(id = R.drawable.ohyeah),
                     contentDescription = null,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
+                // Rectángulo superpuesto
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            if (isDarkMode) Color.Black.copy(alpha = 0.5f)
+                            else Color.White.copy(
+                                alpha = 0.5f
+                            )
+                        )
+                )
+
+            // Logo de la app en la parte superior
+            val logo = if (isDarkMode) {
+                painterResource(id = R.drawable.img) // Logo en modo oscuro
+            } else {
+                painterResource(id = R.drawable.light_mode_icon) // Logo en modo claro
+            }
+            Image(
+                painter = logo,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(100.dp)
+                    .align(Alignment.TopCenter)
+                    .padding(top = 50.dp)
+            )
+            IconButton(
+                onClick = {
+                    appViewModel.isDarkMode.value = !isDarkMode
+                }, // Cambia el modo oscuro
+                modifier = Modifier
+                    //.align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                val icon = if (isDarkMode) {
+                    painterResource(id = R.drawable.ic_sun) // Icono de sol
+                } else {
+                    painterResource(id = R.drawable.ic_moon) // Icono de luna
+                }
+                Image(painter = icon, contentDescription = null)
+            }
+            //Box(modifier = Modifier.fillMaxSize()) {
+
+
                 Column(
                     modifier = Modifier
                         //.fillMaxSize()
@@ -97,7 +170,8 @@ class MainActivity : ComponentActivity() {
                             2.dp,
                             Color.Blue
                         ) else null,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(Color(0xFF0277BD))
                     ) {
                         Text("English")
                         //selectedLanguage = "English"
@@ -115,7 +189,8 @@ class MainActivity : ComponentActivity() {
                             2.dp,
                             Color.Blue
                         ) else null,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(Color(0xFF0277BD))
                     ) {
                         Text("Français")
                         //selectedLanguage = "Français"
@@ -133,13 +208,15 @@ class MainActivity : ComponentActivity() {
                             2.dp,
                             Color.Blue
                         ) else null,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(Color(0xFF0277BD))
                     ) {
                         Text("Español")
                         //selectedLanguage = "Español"
                     }
                 }
-            }
+            //}
+                }
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
 
@@ -159,12 +236,15 @@ class MainActivity : ComponentActivity() {
                                 if (blinkDetected) {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 3
                                 }
-                                if (smileDetected ) {
-
-
-                                    val intent = Intent(this, LoginScreen::class.java).apply {
-                                        putExtra("selectedLanguage",selectedLanguage[selectedButtonIndex])
-                                    }
+                                if (smileDetected &&!isNavigating) {
+                                    isNavigating = true
+                                    if(selectedButtonIndex==0)
+                                        appViewModel.setLanguage("English")
+                                    else if (selectedButtonIndex == 1)
+                                        appViewModel.setLanguage("Français")
+                                        else
+                                            appViewModel.setLanguage("Español")
+                                    val intent = Intent(this, LoginScreen::class.java)
 
                                     startActivity(intent)
                                 }

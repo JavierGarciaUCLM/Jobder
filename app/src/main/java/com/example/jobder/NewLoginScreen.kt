@@ -41,7 +41,7 @@ import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import ui.utils.getTranslation
-import viewmodel.AppViewModel
+import com.example.jobder.AppViewModel
 import java.util.concurrent.Executors
 
 class NewLoginScreen:ComponentActivity() {
@@ -50,15 +50,19 @@ class NewLoginScreen:ComponentActivity() {
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState:Bundle ?){
         super.onCreate(savedInstanceState)
-
-        language = intent.getStringExtra("selectedLanguage") ?:""
+        isNavigating = false
+        // Inicializa el ViewModel usando el contexto de la aplicación
+        appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
+        //language = intent.getStringExtra("selectedLanguage") ?:""
         appViewModel = ViewModelProvider(this).get(AppViewModel:: class.java)
         setContent {
             val context = LocalContext.current
+            val isDarkMode by appViewModel.isDarkMode
+            val language by appViewModel.selectedLanguage
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
+            //val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
             // Variables para almacenar el correo electrónico y la contraseña
             var email by remember {mutableStateOf("")}
             var password by remember {mutableStateOf("")}
@@ -254,9 +258,7 @@ class NewLoginScreen:ComponentActivity() {
                                 }
                                 if (smileDetected && !isNavigating) {
                                     isNavigating = true
-                                    val intent = Intent(this, WelcomeScreen::class.java).apply {
-                                        putExtra("selectedLanguage",language)
-                                    }
+                                    val intent = Intent(this, WelcomeScreen::class.java)
                                     startActivity(intent)
                                 }
                             }

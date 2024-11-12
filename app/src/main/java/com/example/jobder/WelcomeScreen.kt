@@ -49,20 +49,26 @@ import viewmodel.AppViewModel
 import java.util.concurrent.Executors
 
 class WelcomeScreen: ComponentActivity() {
+    //private var isNavigating = false
+    //private lateinit var language: String
+    //private lateinit var appViewModel: AppViewModel
     private var isNavigating = false
-    private lateinit var language: String
-    private lateinit var appViewModel: AppViewModel
+    private lateinit var appViewModel: com.example.jobder.AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        language = intent.getStringExtra("selectedLanguage") ?: ""
-        appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
+        isNavigating = false
+        // Inicializa el ViewModel usando el contexto de la aplicación
+        appViewModel = ViewModelProvider(this)[com.example.jobder.AppViewModel::class.java]
+        //language = intent.getStringExtra("selectedLanguage") ?: ""
+        //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
         setContent {
+            val isDarkMode by appViewModel.isDarkMode
+            val language by appViewModel.selectedLanguage
             val context = LocalContext.current
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
+            //val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
             // Definir colores
             val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
             val buttonColor = Color(0xFF0277BD)     // Color azul oscuro para el botón
@@ -101,7 +107,7 @@ class WelcomeScreen: ComponentActivity() {
                 }
                 Image(
                     painter = logo, // Reemplaza con el logo correcto
-                    contentDescription = "Jobder Logo",
+                    contentDescription = "JobAlba Logo",
                     modifier = Modifier
                         .size(100.dp)
                         .align(Alignment.TopCenter)
