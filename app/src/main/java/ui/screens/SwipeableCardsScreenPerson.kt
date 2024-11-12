@@ -32,11 +32,11 @@ data class Persona(
 fun SwipeableCardsScreenPerson() {
     val personas = remember {
         mutableStateListOf(
-            Persona(R.drawable.persona1, "Juan Pérez", "Desarrollador", "Juan es un experto en desarrollo web."),
-            Persona(R.drawable.persona2, "Ana Gómez", "Diseñadora", "Ana tiene una gran experiencia en diseño gráfico."),
-            Persona(R.drawable.persona3, "Carlos Ruiz", "Gerente de Proyecto", "Carlos gestiona proyectos con gran efectividad."),
-            Persona(R.drawable.persona4, "Luisa Fernández", "Analista de Datos", "Luisa es especialista en análisis de datos."),
-            Persona(R.drawable.persona5, "Gonzalo Mínguez", "Analista de Datos", "Gonzalo es especialista en análisis de datos.")
+            R.drawable.persona1,
+            R.drawable.persona2,
+            R.drawable.persona3,
+            R.drawable.persona4,
+            R.drawable.persona5,
         )
     }
     val coroutineScope = rememberCoroutineScope()
@@ -52,7 +52,7 @@ fun SwipeableCardsScreenPerson() {
         modifier = Modifier.fillMaxSize()
     ) {
         if (personas.isNotEmpty()) {
-            SwipeableCardPerson(
+            SwipeableCard(
                 item = personas.first(),
                 onSwipeLeft = { coroutineScope.launch { removePersona() } },
                 onSwipeRight = { coroutineScope.launch { removePersona() } }
