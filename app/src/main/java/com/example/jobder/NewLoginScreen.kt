@@ -45,20 +45,21 @@ import com.example.jobder.AppViewModel
 import java.util.concurrent.Executors
 
 class NewLoginScreen:ComponentActivity() {
-    private var isNavigating = false
-    private lateinit var language: String
+    //private var isNavigating = false
+    //private lateinit var language: String
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState:Bundle ?){
         super.onCreate(savedInstanceState)
-        isNavigating = false
+        //isNavigating = false
         // Inicializa el ViewModel usando el contexto de la aplicación
-        appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
+        //appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
         //language = intent.getStringExtra("selectedLanguage") ?:""
-        appViewModel = ViewModelProvider(this).get(AppViewModel:: class.java)
+        //appViewModel = ViewModelProvider(this).get(AppViewModel:: class.java)
         setContent {
+            appViewModel.toggleIsNavitaing()
             val context = LocalContext.current
             val isDarkMode by appViewModel.isDarkMode
-            val language by appViewModel.selectedLanguage
+            //val language by appViewModel.selectedLanguage
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
@@ -123,7 +124,7 @@ class NewLoginScreen:ComponentActivity() {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = getTranslation("welcome_to_jobder", language),
+                        text = getTranslation("welcome_to_jobder", appViewModel.getLanguage()),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -140,7 +141,7 @@ class NewLoginScreen:ComponentActivity() {
                             .padding(16.dp),
                         decorationBox = {innerTextField ->
                             if (email.isEmpty()) {
-                                Text(text = getTranslation("email", language), color = Color.Gray)
+                                Text(text = getTranslation("email", appViewModel.getLanguage()), color = Color.Gray)
                             }
                             innerTextField()
                         }
@@ -159,7 +160,7 @@ class NewLoginScreen:ComponentActivity() {
                         visualTransformation = PasswordVisualTransformation(),
                         decorationBox = {innerTextField ->
                             if (password.isEmpty()) {
-                                Text(text = getTranslation("password", language), color = Color.Gray)
+                                Text(text = getTranslation("password", appViewModel.getLanguage()), color = Color.Gray)
                             }
                             innerTextField()
                         }
@@ -201,12 +202,12 @@ class NewLoginScreen:ComponentActivity() {
                         ) else null,
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text(text = getTranslation("login", language), color = Color.White)
+                        Text(text = getTranslation("login", appViewModel.getLanguage()), color = Color.White)
                     }
 
                     // Enlace de "Forgot Password"
                     Text(
-                        text = getTranslation("forgot_password", language),
+                        text = getTranslation("forgot_password", appViewModel.getLanguage()),
                         color = Color.White,
                         modifier = Modifier.padding(top = 10.dp),
                         textAlign = TextAlign.Center
@@ -225,10 +226,10 @@ class NewLoginScreen:ComponentActivity() {
                             .padding(16.dp),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Text(text = getTranslation("dont_have_an_account", language), color = Color.White)
+                        Text(text = getTranslation("dont_have_an_account", appViewModel.getLanguage()), color = Color.White)
                         Spacer(modifier = Modifier.width(4.dp))
                         TextButton(onClick = { /* Navegar a la pantalla de registro */}) {
-                            Text(text = getTranslation("sign_up", language), color = buttonColor)
+                            Text(text = getTranslation("sign_up", appViewModel.getLanguage()), color = buttonColor)
                         }
                     }
                     // }
@@ -256,8 +257,8 @@ class NewLoginScreen:ComponentActivity() {
                                 if (blinkDetected) {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 1
                                 }
-                                if (smileDetected && !isNavigating) {
-                                    isNavigating = true
+                                if (smileDetected && !appViewModel.isNavigating.value) {
+                                    appViewModel.toggleIsNavitaing()
                                     val intent = Intent(this, WelcomeScreen::class.java)
                                     startActivity(intent)
                                 }

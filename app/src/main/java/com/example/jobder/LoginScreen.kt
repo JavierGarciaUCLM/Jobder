@@ -29,12 +29,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.ViewModelProvider
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import ui.utils.getTranslation
-import viewmodel.AppViewModel
+import com.example.jobder.AppViewModel
 import java.util.concurrent.Executors
 
 /***************************** LoginScreen *****************************/
@@ -44,14 +43,17 @@ public class LoginScreen:ComponentActivity() {
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        language = intent.getStringExtra("selectedLanguage") ?: ""
-        appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
+
+        //language = intent.getStringExtra("selectedLanguage") ?: ""
+        //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
         setContent {
             val context = LocalContext.current
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
             val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
+            //val language by  appViewModel.selectedLanguage
+            appViewModel.toggleIsNavitaing()
             // Fondo basado en el modo oscuro
             val backgroundModifier = if (isDarkMode) {
                 Modifier.fillMaxSize().background(Color.Gray)
@@ -124,7 +126,7 @@ public class LoginScreen:ComponentActivity() {
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(Color(0xFF0277BD))
                 ) {
-                    Text(getTranslation("login", language))
+                    Text(getTranslation("login", appViewModel.getLanguage()))
                 }
             }
             cameraProviderFuture.addListener({
@@ -151,10 +153,8 @@ public class LoginScreen:ComponentActivity() {
                                 }
                                 if (smileDetected && !isNavigating) {
                                     Log.e("OhhYEah","Sonrisa detectada!!")
-                                    isNavigating = true
-                                    val intent = Intent(this, NewLoginScreen::class.java).apply {
-                                        putExtra("selectedLanguage",language)
-                                    }
+                                    appViewModel.toggleIsNavitaing()
+                                    val intent = Intent(this, NewLoginScreen::class.java)
                                     startActivity(intent)
                                 }
                             }
