@@ -50,13 +50,15 @@ class NewLoginScreen:ComponentActivity() {
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState:Bundle ?){
         super.onCreate(savedInstanceState)
+        appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
+        appViewModel.toggleIsNavitaing()
         //isNavigating = false
         // Inicializa el ViewModel usando el contexto de la aplicación
         //appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
         //language = intent.getStringExtra("selectedLanguage") ?:""
         //appViewModel = ViewModelProvider(this).get(AppViewModel:: class.java)
         setContent {
-            appViewModel.toggleIsNavitaing()
+            //appViewModel.toggleIsNavitaing()
             val context = LocalContext.current
             val isDarkMode by appViewModel.isDarkMode
             //val language by appViewModel.selectedLanguage

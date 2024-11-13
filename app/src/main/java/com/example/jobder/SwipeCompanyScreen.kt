@@ -19,6 +19,7 @@ class SwipeCompanyScreen:ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+
         //language = intent.getStringExtra("selectedLanguage") ?:""
         //appViewModel = ViewModelProvider(this).get(AppViewModel:: class.java)
         setContent {

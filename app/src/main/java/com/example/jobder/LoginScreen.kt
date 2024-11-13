@@ -14,13 +14,19 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,21 +35,23 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import ui.utils.getTranslation
-import com.example.jobder.AppViewModel
 import java.util.concurrent.Executors
 
 /***************************** LoginScreen *****************************/
 public class LoginScreen:ComponentActivity() {
-    private var isNavigating = false
-    private lateinit var language: String
+    //private var isNavigating = false
+    //private lateinit var language: String
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
+        appViewModel.toggleIsNavitaing()
+        println("Iniciando LoginScreen.kt")
         //language = intent.getStringExtra("selectedLanguage") ?: ""
         //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
         setContent {
@@ -51,9 +59,9 @@ public class LoginScreen:ComponentActivity() {
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
+            val isDarkMode by appViewModel.isDarkMode // Obtiene el estado de modo oscuro
             //val language by  appViewModel.selectedLanguage
-            appViewModel.toggleIsNavitaing()
+            //appViewModel.toggleIsNavitaing()
             // Fondo basado en el modo oscuro
             val backgroundModifier = if (isDarkMode) {
                 Modifier.fillMaxSize().background(Color.Gray)
@@ -151,7 +159,7 @@ public class LoginScreen:ComponentActivity() {
                                 if (blinkDetected) {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 1
                                 }
-                                if (smileDetected && !isNavigating) {
+                                if (smileDetected && !appViewModel.isNavigating.value) {
                                     Log.e("OhhYEah","Sonrisa detectada!!")
                                     appViewModel.toggleIsNavitaing()
                                     val intent = Intent(this, NewLoginScreen::class.java)
@@ -213,5 +221,17 @@ public class LoginScreen:ComponentActivity() {
                     }
             }
         }
+
+    override fun onResume() {
+        super.onResume()
+        appViewModel.toggleIsNavitaing()
+        LoginScreen()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        appViewModel.toggleIsNavitaing()
+        MainActivity()
+    }
     }
 

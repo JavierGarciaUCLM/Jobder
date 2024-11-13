@@ -68,13 +68,15 @@ import java.util.concurrent.Executors
 
 
 class MainActivity : ComponentActivity() {
-    private var isNavigating = false
+    //private var isNavigating = false
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        isNavigating = false
+        println("Iniciando MainScreen.kt")
+        //isNavigating = false
         // Inicializa el ViewModel usando el contexto de la aplicación
         appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
+        appViewModel.toggleIsNavitaing()
 
 
         //enableEdgeToEdge()
@@ -82,7 +84,7 @@ class MainActivity : ComponentActivity() {
             // Crear instancia de AppViewModel
             //val appViewModel = remember { AppViewModel() }
             val isDarkMode by appViewModel.isDarkMode
-            val language by appViewModel.selectedLanguage
+            //val language by appViewModel.selectedLanguage
             // Observa el valor de isDarkMode
             //val isDarkMode by appViewModel.isDarkMode
             val context = LocalContext.current
@@ -236,8 +238,8 @@ class MainActivity : ComponentActivity() {
                                 if (blinkDetected) {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 3
                                 }
-                                if (smileDetected &&!isNavigating) {
-                                    isNavigating = true
+                                if (smileDetected &&!appViewModel.isNavigating.value) {
+                                    appViewModel.toggleIsNavitaing()
                                     if(selectedButtonIndex==0)
                                         appViewModel.setLanguage("English")
                                     else if (selectedButtonIndex == 1)
@@ -271,38 +273,54 @@ class MainActivity : ComponentActivity() {
         imageProxy: ImageProxy,
         onGestureDetected: (Boolean, Boolean) -> Unit
     ) {
-        val mediaImage = imageProxy.image
-        if (mediaImage != null) {
-            val image = InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
-            detector.process(image)
-                .addOnSuccessListener { faces ->
-                    var blinkDetected = false
-                    var smileDetected = false
-                    for (face in faces) {
-                        face.smilingProbability?.let { smileProb ->
-                            if (smileProb > 0.5) {
-                                Log.e("FaceDetection", "¡Sonrisa detectada!")
-                                smileDetected = true
+        if(imageProxy!=null) {
+            val mediaImage = imageProxy.image
+            if (mediaImage != null) {
+                val image =
+                    InputImage.fromMediaImage(mediaImage, imageProxy.imageInfo.rotationDegrees)
+                detector.process(image)
+                    .addOnSuccessListener { faces ->
+                        var blinkDetected = false
+                        var smileDetected = false
+                        for (face in faces) {
+                            face.smilingProbability?.let { smileProb ->
+                                if (smileProb > 0.5) {
+                                    Log.e("FaceDetection", "¡Sonrisa detectada!")
+                                    smileDetected = true
+                                }
                             }
-                        }
-                        face.leftEyeOpenProbability?.let { leftEyeProb ->
-                            face.rightEyeOpenProbability?.let { rightEyeProb ->
-                                if (leftEyeProb < 0.5 && rightEyeProb < 0.5) {
-                                    Log.e("FaceDetection", "¡Parpadeo detectado!")
-                                    blinkDetected = true
+                            face.leftEyeOpenProbability?.let { leftEyeProb ->
+                                face.rightEyeOpenProbability?.let { rightEyeProb ->
+                                    if (leftEyeProb < 0.5 && rightEyeProb < 0.5) {
+                                        Log.e("FaceDetection", "¡Parpadeo detectado!")
+                                        blinkDetected = true
+                                    }
                                 }
                             }
                         }
+                        onGestureDetected(blinkDetected, smileDetected)
                     }
-                    onGestureDetected(blinkDetected, smileDetected)
-                }
-                .addOnFailureListener { e ->
-                    Log.e("FaceDetection", "Error al detectar la cara", e)
-                }
-                .addOnCompleteListener {
-                    imageProxy.close()
-                }
+                    .addOnFailureListener { e ->
+                        Log.e("FaceDetection", "Error al detectar la cara", e)
+                    }
+                    .addOnCompleteListener {
+                        System.out.println("Cerrando proxy")
+                        imageProxy.close()
+                    }
+            }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appViewModel.toggleIsNavitaing()
+        MainActivity()
+        println("Sí que funciona!!!")
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        MainActivity()
     }
 }
           //  JobderTheme {

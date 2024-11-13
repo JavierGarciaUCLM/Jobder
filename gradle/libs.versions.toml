@@ -12,6 +12,7 @@ cameraCore = "1.4.0"
 visionCommon = "17.3.0"
 cameraLifecycle = "1.4.0"
 playServicesMlkitFaceDetection = "17.1.0"
+lifecycleViewmodelAndroid = "2.8.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -32,6 +33,7 @@ androidx-camera-core = { group = "androidx.camera", name = "camera-core", versio
 vision-common = { group = "com.google.mlkit", name = "vision-common", version.ref = "visionCommon" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraLifecycle" }
 play-services-mlkit-face-detection = { group = "com.google.android.gms", name = "play-services-mlkit-face-detection", version.ref = "playServicesMlkitFaceDetection" }
+androidx-lifecycle-viewmodel-android = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-android", version.ref = "lifecycleViewmodelAndroid" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
