@@ -320,4 +320,10 @@ class NewLoginScreen:ComponentActivity() {
                 }
         }
     }
+
+    override fun onResume() {
+        super.onResume()
+        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleDarkMode()
+    }
 }

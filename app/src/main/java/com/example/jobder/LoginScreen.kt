@@ -225,7 +225,7 @@ public class LoginScreen:ComponentActivity() {
     override fun onResume() {
         super.onResume()
         appViewModel.toggleIsNavitaing()
-        LoginScreen()
+        appViewModel.toggleDarkMode()
     }
 
     override fun onBackPressed() {

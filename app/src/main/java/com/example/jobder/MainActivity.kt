@@ -314,8 +314,7 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         appViewModel.toggleIsNavitaing()
-        MainActivity()
-        println("Sí que funciona!!!")
+        appViewModel.toggleDarkMode()
     }
 
     override fun onBackPressed() {

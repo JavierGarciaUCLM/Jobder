@@ -56,7 +56,7 @@ class WelcomeScreen: ComponentActivity() {
     private lateinit var appViewModel: com.example.jobder.AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        isNavigating = false
+        //isNavigating = false
         // Inicializa el ViewModel usando el contexto de la aplicación
         appViewModel = ViewModelProvider(this)[com.example.jobder.AppViewModel::class.java]
         //language = intent.getStringExtra("selectedLanguage") ?: ""
@@ -65,6 +65,7 @@ class WelcomeScreen: ComponentActivity() {
             val isDarkMode by appViewModel.isDarkMode
             val language by appViewModel.selectedLanguage
             val context = LocalContext.current
+            appViewModel.toggleIsNavitaing()
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
@@ -280,5 +281,11 @@ class WelcomeScreen: ComponentActivity() {
                     imageProxy.close()
                 }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleDarkMode()
     }
 }
