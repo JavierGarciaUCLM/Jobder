@@ -49,28 +49,22 @@ import viewmodel.AppViewModel
 import java.util.concurrent.Executors
 
 class WelcomeScreen: ComponentActivity() {
-    //private var isNavigating = false
-    //private lateinit var language: String
-    //private lateinit var appViewModel: AppViewModel
-    private var isNavigating = false
+
     private lateinit var appViewModel: com.example.jobder.AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //isNavigating = false
-        // Inicializa el ViewModel usando el contexto de la aplicación
-        appViewModel = ViewModelProvider(this)[com.example.jobder.AppViewModel::class.java]
-        //language = intent.getStringExtra("selectedLanguage") ?: ""
-        //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
+
+        appViewModel = ViewModelProvider(this).get(com.example.jobder.AppViewModel::class.java)//language = intent.getStringExtra("selectedLanguage") ?: ""
+        appViewModel.toggleIsNavigating()
         setContent {
-            val isDarkMode by appViewModel.isDarkMode
-            val language by appViewModel.selectedLanguage
+
+            val language = appViewModel.getLanguage()
             val context = LocalContext.current
-            appViewModel.toggleIsNavitaing()
+
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            //val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
-            // Definir colores
+            val isDarkMode by appViewModel.isDarkMode
             val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
             val buttonColor = Color(0xFF0277BD)     // Color azul oscuro para el botón
             // Fondo basado en el modo oscuro
@@ -217,8 +211,8 @@ class WelcomeScreen: ComponentActivity() {
                                 if (blinkDetected) {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 2
                                 }
-                                if (smileDetected && !isNavigating) {
-                                    isNavigating = true
+                                if (smileDetected && !appViewModel.isNavigating.value) {
+                                    appViewModel.toggleIsNavigating()
                                     var intent: Intent? = null
                                     if (selectedButtonIndex == 0){
                                         intent = Intent(this, SwipeCompanyScreen::class.java)
@@ -285,7 +279,7 @@ class WelcomeScreen: ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
         appViewModel.toggleDarkMode()
     }
 }

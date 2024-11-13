@@ -50,7 +50,7 @@ public class LoginScreen:ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
         println("Iniciando LoginScreen.kt")
         //language = intent.getStringExtra("selectedLanguage") ?: ""
         //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
@@ -161,7 +161,7 @@ public class LoginScreen:ComponentActivity() {
                                 }
                                 if (smileDetected && !appViewModel.isNavigating.value) {
                                     Log.e("OhhYEah","Sonrisa detectada!!")
-                                    appViewModel.toggleIsNavitaing()
+                                    appViewModel.toggleIsNavigating()
                                     val intent = Intent(this, NewLoginScreen::class.java)
                                     startActivity(intent)
                                 }
@@ -224,13 +224,13 @@ public class LoginScreen:ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
         appViewModel.toggleDarkMode()
     }
 
     override fun onBackPressed() {
         super.onBackPressed()
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
         MainActivity()
     }
     }

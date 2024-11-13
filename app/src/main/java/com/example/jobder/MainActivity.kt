@@ -54,6 +54,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.google.mlkit.vision.common.InputImage
@@ -76,7 +77,7 @@ class MainActivity : ComponentActivity() {
         //isNavigating = false
         // Inicializa el ViewModel usando el contexto de la aplicación
         appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
 
 
         //enableEdgeToEdge()
@@ -239,13 +240,16 @@ class MainActivity : ComponentActivity() {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 3
                                 }
                                 if (smileDetected &&!appViewModel.isNavigating.value) {
-                                    appViewModel.toggleIsNavitaing()
+                                    appViewModel.toggleIsNavigating()
                                     if(selectedButtonIndex==0)
-                                        appViewModel.setLanguage("English")
+                                        appViewModel.setLanguage(0)
                                     else if (selectedButtonIndex == 1)
-                                        appViewModel.setLanguage("Français")
+                                        appViewModel.setLanguage(1)
                                         else
-                                            appViewModel.setLanguage("Español")
+                                            appViewModel.setLanguage(2)
+
+                                    println("Selected Language: ${appViewModel.getLanguage()}") // Debería imprimir el idioma seleccionado
+
                                     val intent = Intent(this, LoginScreen::class.java)
 
                                     startActivity(intent)
@@ -313,7 +317,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
         appViewModel.toggleDarkMode()
     }
 

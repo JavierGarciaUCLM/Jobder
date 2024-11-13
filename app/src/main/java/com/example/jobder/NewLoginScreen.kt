@@ -51,7 +51,7 @@ class NewLoginScreen:ComponentActivity() {
     override fun onCreate(savedInstanceState:Bundle ?){
         super.onCreate(savedInstanceState)
         appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
         //isNavigating = false
         // Inicializa el ViewModel usando el contexto de la aplicación
         //appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
@@ -260,7 +260,7 @@ class NewLoginScreen:ComponentActivity() {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 1
                                 }
                                 if (smileDetected && !appViewModel.isNavigating.value) {
-                                    appViewModel.toggleIsNavitaing()
+                                    appViewModel.toggleIsNavigating()
                                     val intent = Intent(this, WelcomeScreen::class.java)
                                     startActivity(intent)
                                 }
@@ -323,7 +323,7 @@ class NewLoginScreen:ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        appViewModel.toggleIsNavitaing()
+        appViewModel.toggleIsNavigating()
         appViewModel.toggleDarkMode()
     }
 }
