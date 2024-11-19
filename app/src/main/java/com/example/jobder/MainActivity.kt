@@ -250,7 +250,9 @@ class MainActivity : ComponentActivity() {
 
                                     println("Selected Language: ${appViewModel.getLanguage()}") // Debería imprimir el idioma seleccionado
 
-                                    val intent = Intent(this, LoginScreen::class.java)
+                                    val intent = Intent(this, LoginScreen::class.java).apply{
+                                        putExtra("language",appViewModel.getLanguage())
+                                    }
 
                                     startActivity(intent)
                                 }

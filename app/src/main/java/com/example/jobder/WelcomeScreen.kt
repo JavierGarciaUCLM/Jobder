@@ -49,7 +49,7 @@ import viewmodel.AppViewModel
 import java.util.concurrent.Executors
 
 class WelcomeScreen: ComponentActivity() {
-
+    private lateinit var language: String
     private lateinit var appViewModel: com.example.jobder.AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,9 +58,9 @@ class WelcomeScreen: ComponentActivity() {
         appViewModel.toggleIsNavigating()
         setContent {
 
-            val language = appViewModel.getLanguage()
+            //val language = appViewModel.getLanguage()
             val context = LocalContext.current
-
+            language = intent.getStringExtra("language") ?:""
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
