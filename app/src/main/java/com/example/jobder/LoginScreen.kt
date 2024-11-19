@@ -45,11 +45,12 @@ import java.util.concurrent.Executors
 /***************************** LoginScreen *****************************/
 public class LoginScreen:ComponentActivity() {
     //private var isNavigating = false
-    //private lateinit var language: String
+    private lateinit var language: String
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
+        language = intent.getStringExtra("language") ?: ""
         appViewModel.toggleIsNavigating()
         println("Iniciando LoginScreen.kt")
         //language = intent.getStringExtra("selectedLanguage") ?: ""
@@ -134,7 +135,7 @@ public class LoginScreen:ComponentActivity() {
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(Color(0xFF0277BD))
                 ) {
-                    Text(getTranslation("login", appViewModel.getLanguage()))
+                    Text(getTranslation("login", language))
                 }
             }
             cameraProviderFuture.addListener({
@@ -162,7 +163,7 @@ public class LoginScreen:ComponentActivity() {
                                 if (smileDetected && !appViewModel.isNavigating.value) {
                                     Log.e("OhhYEah","Sonrisa detectada!!")
                                     appViewModel.toggleIsNavigating()
-                                    val intent = Intent(this, NewLoginScreen::class.java)
+                                    val intent = Intent(this, NewLoginScreen::class.java).apply { putExtra("language",language) }
                                     startActivity(intent)
                                 }
                             }
