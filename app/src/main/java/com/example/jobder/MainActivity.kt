@@ -84,7 +84,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             // Crear instancia de AppViewModel
             //val appViewModel = remember { AppViewModel() }
-            val isDarkMode by appViewModel.isDarkMode
+            var isDarkMode by remember {mutableStateOf(false)}
             //val language by appViewModel.selectedLanguage
             // Observa el valor de isDarkMode
             //val isDarkMode by appViewModel.isDarkMode
@@ -138,7 +138,7 @@ class MainActivity : ComponentActivity() {
             )
             IconButton(
                 onClick = {
-                    appViewModel.isDarkMode.value = !isDarkMode
+                    isDarkMode = !isDarkMode
                 }, // Cambia el modo oscuro
                 modifier = Modifier
                     //.align(Alignment.TopEnd)
@@ -163,8 +163,12 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Button(
                         onClick = {
-                            //onLanguageSelected("English")
-                            //navController.navigate("login_screen")
+                            val intent = Intent(context, LoginScreen::class.java).apply{
+                                putExtra("language","English")
+                                putExtra("isDarkMode",isDarkMode)
+                            }
+
+                            startActivity(intent)
                         },
                         modifier = Modifier
                             .padding(8.dp)
@@ -184,6 +188,13 @@ class MainActivity : ComponentActivity() {
                         onClick = {
                             //onLanguageSelected("Français")
                             //navController.navigate("login_screen")
+
+                            val intent = Intent(context, LoginScreen::class.java).apply{
+                                putExtra("language","Français")
+                                putExtra("isDarkMode",isDarkMode)
+                            }
+
+                            startActivity(intent)
                         },
                         modifier = Modifier
                             .padding(8.dp)
@@ -201,8 +212,12 @@ class MainActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
-                            //onLanguageSelected("Español")
-                            //navController.navigate("login_screen")
+                            val intent = Intent(context, LoginScreen::class.java).apply{
+                                putExtra("language","Español")
+                                putExtra("isDarkMode",isDarkMode)
+                            }
+
+                            startActivity(intent)
                         },
                         modifier = Modifier
                             .padding(8.dp)
@@ -252,6 +267,7 @@ class MainActivity : ComponentActivity() {
 
                                     val intent = Intent(this, LoginScreen::class.java).apply{
                                         putExtra("language",appViewModel.getLanguage())
+                                        putExtra("isDarkMode",isDarkMode)
                                     }
 
                                     startActivity(intent)

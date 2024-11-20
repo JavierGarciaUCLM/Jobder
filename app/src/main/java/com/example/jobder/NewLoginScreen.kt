@@ -1,5 +1,6 @@
 package com.example.jobder
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -60,7 +61,7 @@ class NewLoginScreen:ComponentActivity() {
         setContent {
             //appViewModel.toggleIsNavitaing()
             val context = LocalContext.current
-            val isDarkMode by appViewModel.isDarkMode
+            //val isDarkMode = appViewModel.isDarkMode
             //val language by appViewModel.selectedLanguage
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
@@ -70,7 +71,12 @@ class NewLoginScreen:ComponentActivity() {
             var email by remember {mutableStateOf("")}
             var password by remember {mutableStateOf("")}
 
-
+            var isDarkMode by remember { mutableStateOf(false) }
+            //isDarkMode = intent.getBooleanExtra("isDarkMode",false)
+            LaunchedEffect(Unit) {
+                val intent = (context as? Activity)?.intent
+                isDarkMode = intent?.getBooleanExtra("isDarkMode", false) ?: false
+            }
             // Definir colores
             val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
             val buttonColor = Color(0xFF0277BD)     // Color azul oscuro para el botón
@@ -80,6 +86,7 @@ class NewLoginScreen:ComponentActivity() {
             } else {
                 Modifier.fillMaxSize().background(backgroundColor)
             }
+
 
             Box(modifier = backgroundModifier) {
 
@@ -101,7 +108,21 @@ class NewLoginScreen:ComponentActivity() {
                             )
                         )
                 )
-
+                IconButton(
+                    onClick = {
+                        isDarkMode = !isDarkMode
+                    }, // Cambia el modo oscuro
+                    modifier = Modifier
+                        //.align(Alignment.TopEnd)
+                        .padding(16.dp)
+                ) {
+                    val icon = if (isDarkMode) {
+                        painterResource(id = R.drawable.ic_sun) // Icono de sol
+                    } else {
+                        painterResource(id = R.drawable.ic_moon) // Icono de luna
+                    }
+                    Image(painter = icon, contentDescription = null)
+                }
                 // Logo de la app en la parte superior
                 val logo = if (isDarkMode) {
                     painterResource(id = R.drawable.img) // Logo en modo oscuro
@@ -175,26 +196,16 @@ class NewLoginScreen:ComponentActivity() {
 //                    .fillMaxSize()
 //                    .padding(16.dp)
 //            ) {
-                    IconButton(
-                        onClick = {
-                            appViewModel.isDarkMode.value = !isDarkMode
-                        }, // Cambia el modo oscuro
-                        modifier = Modifier
-                            //.align(Alignment.TopEnd)
-                            .padding(16.dp)
-                    ) {
-                        val icon = if (isDarkMode) {
-                            painterResource(id = R.drawable.ic_sun) // Icono de sol
-                        } else {
-                            painterResource(id = R.drawable.ic_moon) // Icono de luna
-                        }
-                        Image(painter = icon, contentDescription = null)
-                    }
+
                     //}
                     // Botón de Iniciar Sesión
                     Button(
                         onClick = {
-                            //navController.navigate("welcome_screen")
+                            val intent = Intent(context, WelcomeScreen::class.java).apply {
+                                putExtra("language",language)
+                                putExtra("isDarkMode",isDarkMode)
+                            }
+                            startActivity(intent)
                                   },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(buttonColor),
@@ -261,7 +272,10 @@ class NewLoginScreen:ComponentActivity() {
                                 }
                                 if (smileDetected && !appViewModel.isNavigating.value) {
                                     appViewModel.toggleIsNavigating()
-                                    val intent = Intent(this, WelcomeScreen::class.java).apply { putExtra("language",language) }
+                                    val intent = Intent(this, WelcomeScreen::class.java).apply {
+                                        putExtra("language",language)
+                                        putExtra("isDarkMode",isDarkMode)
+                                    }
                                     startActivity(intent)
                                 }
                             }

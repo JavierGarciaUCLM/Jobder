@@ -1,5 +1,6 @@
 package com.example.jobder
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -23,6 +24,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,17 +52,25 @@ public class LoginScreen:ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
-        language = intent.getStringExtra("language") ?: ""
         appViewModel.toggleIsNavigating()
         println("Iniciando LoginScreen.kt")
         //language = intent.getStringExtra("selectedLanguage") ?: ""
         //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
         setContent {
             val context = LocalContext.current
+            language = intent.getStringExtra("language") ?: ""
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            val isDarkMode by appViewModel.isDarkMode // Obtiene el estado de modo oscuro
+            var isDarkMode by remember{ mutableStateOf(false) }
+
+            //isDarkMode = intent.getBooleanExtra("isDarkMode",false)
+            // Recuperar el valor del Intent
+            LaunchedEffect(Unit) {
+                val intent = (context as? Activity)?.intent
+                isDarkMode = intent?.getBooleanExtra("isDarkMode", false) ?: false
+            }
+            //val isDarkMode = appViewModel.isDarkMode // Obtiene el estado de modo oscuro
             //val language by  appViewModel.selectedLanguage
             //appViewModel.toggleIsNavitaing()
             // Fondo basado en el modo oscuro
@@ -88,6 +98,7 @@ public class LoginScreen:ComponentActivity() {
                             )
                         )
                 )
+
                 // Logo
                 val logo = if (isDarkMode) {
                     painterResource(id = R.drawable.img) // Logo en modo oscuro
@@ -102,13 +113,13 @@ public class LoginScreen:ComponentActivity() {
                         .align(Alignment.TopCenter)
                         .padding(top = 50.dp)
                 )
-                // Botón de cambio de modo oscuro
+// Botón de cambio de modo oscuro
                 IconButton(
                     onClick = {
-                        appViewModel.isDarkMode.value = !isDarkMode
+                        isDarkMode = !isDarkMode
                     }, // Cambia el modo oscuro
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
+                        //.align(Alignment.TopEnd)
                         .padding(16.dp)
                 ) {
                     val icon = if (isDarkMode) {
@@ -122,8 +133,11 @@ public class LoginScreen:ComponentActivity() {
                 // Botón de Log in
                 Button(
                     onClick = {
-                        // Navegar a la nueva pantalla de inicio de sesión
-                        //navController.navigate("new_login_screen")
+                        val intent = Intent(context, NewLoginScreen::class.java).apply {
+                            putExtra("language",language)
+                            putExtra("isDarkMode",isDarkMode)
+                        }
+                        startActivity(intent)
                     },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
@@ -163,7 +177,10 @@ public class LoginScreen:ComponentActivity() {
                                 if (smileDetected && !appViewModel.isNavigating.value) {
                                     Log.e("OhhYEah","Sonrisa detectada!!")
                                     appViewModel.toggleIsNavigating()
-                                    val intent = Intent(this, NewLoginScreen::class.java).apply { putExtra("language",language) }
+                                    val intent = Intent(this, NewLoginScreen::class.java).apply {
+                                        putExtra("language",language)
+                                        putExtra("isDarkMode",isDarkMode)
+                                    }
                                     startActivity(intent)
                                 }
                             }

@@ -1,5 +1,6 @@
 package com.example.jobder
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -24,7 +25,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,7 +67,13 @@ class WelcomeScreen: ComponentActivity() {
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            val isDarkMode by appViewModel.isDarkMode
+            //val isDarkMode = appViewModel.isDarkMode
+            var isDarkMode by remember { mutableStateOf(false) }
+            //isDarkMode = intent.getBooleanExtra("isDarkMode",false)
+            LaunchedEffect(Unit) {
+                val intent = (context as? Activity)?.intent
+                isDarkMode = intent?.getBooleanExtra("isDarkMode", false) ?: false
+            }
             val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
             val buttonColor = Color(0xFF0277BD)     // Color azul oscuro para el botón
             // Fondo basado en el modo oscuro
@@ -93,7 +102,21 @@ class WelcomeScreen: ComponentActivity() {
                             )
                         )
                 )
-
+                IconButton(
+                    onClick = {
+                        isDarkMode = !isDarkMode
+                    }, // Cambia el modo oscuro
+                    modifier = Modifier
+                        //.align(Alignment.TopEnd)
+                        .padding(16.dp)
+                ) {
+                    val icon = if (isDarkMode) {
+                        painterResource(id = R.drawable.ic_sun) // Icono de sol
+                    } else {
+                        painterResource(id = R.drawable.ic_moon) // Icono de luna
+                    }
+                    Image(painter = icon, contentDescription = null)
+                }
                 // Logo de la app en la parte superior
                 val logo = if (isDarkMode) {
                     painterResource(id = R.drawable.img) // Logo en modo oscuro
@@ -139,7 +162,8 @@ class WelcomeScreen: ComponentActivity() {
                         // Botón de "Join as a User"
                         Button(
                             onClick = {
-                                //navController.navigate("swipe_screen")
+                                intent = Intent(context, SwipeCompanyScreen::class.java)
+                                startActivity(intent)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -160,7 +184,8 @@ class WelcomeScreen: ComponentActivity() {
                         // Botón de "Join as a Company"
                         Button(
                             onClick = {
-                                //navController.navigate("swipe_screen_person")
+                                intent = Intent(context,SwipePersonScreen::class.java)
+                                startActivity(intent)
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
