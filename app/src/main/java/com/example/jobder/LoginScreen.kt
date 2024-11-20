@@ -53,6 +53,7 @@ public class LoginScreen:ComponentActivity() {
         super.onCreate(savedInstanceState)
         appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
         appViewModel.toggleIsNavigating()
+        var (isDarkMode, language) = PreferencesHelper.loadPreferences(this)
         println("Iniciando LoginScreen.kt")
         //language = intent.getStringExtra("selectedLanguage") ?: ""
         //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
@@ -62,14 +63,14 @@ public class LoginScreen:ComponentActivity() {
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            var isDarkMode by remember{ mutableStateOf(false) }
+            //var isDarkMode by remember{ mutableStateOf(false) }
 
             //isDarkMode = intent.getBooleanExtra("isDarkMode",false)
             // Recuperar el valor del Intent
-            LaunchedEffect(Unit) {
-                val intent = (context as? Activity)?.intent
-                isDarkMode = intent?.getBooleanExtra("isDarkMode", false) ?: false
-            }
+//            LaunchedEffect(Unit) {
+//                val intent = (context as? Activity)?.intent
+//                isDarkMode = intent?.getBooleanExtra("isDarkMode", false) ?: false
+//            }
             //val isDarkMode = appViewModel.isDarkMode // Obtiene el estado de modo oscuro
             //val language by  appViewModel.selectedLanguage
             //appViewModel.toggleIsNavitaing()
@@ -117,6 +118,7 @@ public class LoginScreen:ComponentActivity() {
                 IconButton(
                     onClick = {
                         isDarkMode = !isDarkMode
+                        PreferencesHelper.savePreferences(context,isDarkMode, language = language)
                     }, // Cambia el modo oscuro
                     modifier = Modifier
                         //.align(Alignment.TopEnd)
@@ -181,6 +183,7 @@ public class LoginScreen:ComponentActivity() {
                                         putExtra("language",language)
                                         putExtra("isDarkMode",isDarkMode)
                                     }
+                                    PreferencesHelper.savePreferences(this,isDarkMode, language = language)
                                     startActivity(intent)
                                 }
                             }

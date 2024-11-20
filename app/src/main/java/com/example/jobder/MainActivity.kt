@@ -78,13 +78,15 @@ class MainActivity : ComponentActivity() {
         // Inicializa el ViewModel usando el contexto de la aplicación
         appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
         appViewModel.toggleIsNavigating()
+        val (isDarkMode, language) = PreferencesHelper.loadPreferences(this)
+        // Usa isDarkMode y language según sea necesario
 
 
         //enableEdgeToEdge()
         setContent {
             // Crear instancia de AppViewModel
             //val appViewModel = remember { AppViewModel() }
-            var isDarkMode by remember {mutableStateOf(false)}
+            //var isDarkMode by remember {mutableStateOf(false)}
             //val language by appViewModel.selectedLanguage
             // Observa el valor de isDarkMode
             //val isDarkMode by appViewModel.isDarkMode
@@ -138,8 +140,10 @@ class MainActivity : ComponentActivity() {
             )
             IconButton(
                 onClick = {
-                    isDarkMode = !isDarkMode
-                }, // Cambia el modo oscuro
+                    //isDarkMode = !isDarkMode
+                    PreferencesHelper.savePreferences(context,isDarkMode, language = language)
+
+            }, // Cambia el modo oscuro
                 modifier = Modifier
                     //.align(Alignment.TopEnd)
                     .padding(16.dp)
@@ -163,10 +167,12 @@ class MainActivity : ComponentActivity() {
                 ) {
                     Button(
                         onClick = {
+                            PreferencesHelper.savePreferences(context,isDarkMode, language = "English")
                             val intent = Intent(context, LoginScreen::class.java).apply{
                                 putExtra("language","English")
                                 putExtra("isDarkMode",isDarkMode)
                             }
+
 
                             startActivity(intent)
                         },
@@ -188,11 +194,12 @@ class MainActivity : ComponentActivity() {
                         onClick = {
                             //onLanguageSelected("Français")
                             //navController.navigate("login_screen")
-
+                            PreferencesHelper.savePreferences(context,isDarkMode, language = "Français")
                             val intent = Intent(context, LoginScreen::class.java).apply{
                                 putExtra("language","Français")
                                 putExtra("isDarkMode",isDarkMode)
                             }
+
 
                             startActivity(intent)
                         },
@@ -212,10 +219,12 @@ class MainActivity : ComponentActivity() {
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
+                            PreferencesHelper.savePreferences(context,isDarkMode, language = "Español")
                             val intent = Intent(context, LoginScreen::class.java).apply{
                                 putExtra("language","Español")
                                 putExtra("isDarkMode",isDarkMode)
                             }
+
 
                             startActivity(intent)
                         },
@@ -256,12 +265,15 @@ class MainActivity : ComponentActivity() {
                                 }
                                 if (smileDetected &&!appViewModel.isNavigating.value) {
                                     appViewModel.toggleIsNavigating()
-                                    if(selectedButtonIndex==0)
+                                    if(selectedButtonIndex==0){
                                         appViewModel.setLanguage(0)
-                                    else if (selectedButtonIndex == 1)
+                                        PreferencesHelper.savePreferences(this,isDarkMode, language = "English")}
+                                    else if (selectedButtonIndex == 1){
                                         appViewModel.setLanguage(1)
-                                        else
+                                    PreferencesHelper.savePreferences(this,isDarkMode, language = "Français")}
+                                        else{
                                             appViewModel.setLanguage(2)
+                                    PreferencesHelper.savePreferences(this,isDarkMode, language = "Español")}
 
                                     println("Selected Language: ${appViewModel.getLanguage()}") // Debería imprimir el idioma seleccionado
 
@@ -335,8 +347,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        var (isDarkMode,language) = PreferencesHelper.loadPreferences(this)
         appViewModel.toggleIsNavigating()
-        appViewModel.toggleDarkMode()
+        //appViewModel.toggleDarkMode()
     }
 
     override fun onBackPressed() {
