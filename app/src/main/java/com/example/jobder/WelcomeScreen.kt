@@ -151,7 +151,7 @@ class WelcomeScreen: ComponentActivity() {
                     ) {
                         // Texto de bienvenida
                         Text(
-                            text = getTranslation("welcome_to_jobder", language),
+                            text = getTranslation("welcome_to_jobder", SharedState.language.value),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black,
@@ -176,7 +176,7 @@ class WelcomeScreen: ComponentActivity() {
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
-                                text = getTranslation("join_as_a_user", language),
+                                text = getTranslation("join_as_a_user", SharedState.language.value),
                                 color = Color.White
                             )
                         }
@@ -198,14 +198,14 @@ class WelcomeScreen: ComponentActivity() {
                             shape = RoundedCornerShape(8.dp)
                         ) {
                             Text(
-                                text = getTranslation("join_as_a_company", language),
+                                text = getTranslation("join_as_a_company", SharedState.language.value),
                                 color = Color.White
                             )
                         }
 
                         // Texto de "Forgot password?"
                         Text(
-                            text = getTranslation("forgot_password", language),
+                            text = getTranslation("forgot_password", SharedState.language.value),
                             color = Color(0xFF0277BD),
                             fontSize = 14.sp,
                             modifier = Modifier.padding(top = 10.dp),
