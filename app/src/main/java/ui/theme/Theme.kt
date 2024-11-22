@@ -3,6 +3,7 @@ package ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -33,27 +34,67 @@ private val LightColorScheme = lightColorScheme(
     onSurface = Color(0xFF1C1B1F),
     */
 )
+object Theme {
+    val Light = lightColorScheme(
+        background = Colors.container_light,
+        onBackground = Colors.text_light,
+        primaryContainer = Colors.black,
+        onPrimaryContainer = Colors.container_light,
+        secondaryContainer = Colors.purple_500,
+        onSecondaryContainer = Colors.purple_200
+    )
+    val Dark = darkColorScheme(
+        background = Colors.background_dark,
+        onBackground = Colors.text_dark,
+        primaryContainer = Colors.text_dark,
+        onPrimaryContainer = Colors.container_dark
+    )
+    val lightTritanopia = lightColorScheme(
+        background = Colors.background_light_tritanopia,
+        onBackground = Colors.text_light_tritanopia,
+        primaryContainer = Colors.text_light_tritanopia,
+        onPrimaryContainer = Colors.background_light_tritanopia
+    )
+    val DarkTritanopia = darkColorScheme(
+        background = Colors.background_dark_tritanopia,
+        onBackground = Colors.text_dark_tritanopia,
+        primaryContainer = Colors.text_dark_tritanopia,
+        onPrimaryContainer = Colors.background_dark_tritanopia
+    )
+    val lightProtanopia = lightColorScheme(
+        background = Colors.background_light_protanopia,
+        onBackground = Colors.text_light_protanopia,
+        primaryContainer = Colors.text_light_protanopia,
+        onPrimaryContainer = Colors.background_light_protanopia
+    )
+    val DarkProtanopia = darkColorScheme(
+        background = Colors.background_dark_protanopia,
+        onBackground = Colors.text_dark_protanopia,
+        primaryContainer = Colors.text_dark_protanopia,
+        onPrimaryContainer = Colors.background_dark_protanopia
+    )
+    val lightDeuteranopia = lightColorScheme(
+        background = Colors.background_light_deuteranopia,
+        onBackground = Colors.text_light_deuteranopia,
+        primaryContainer = Colors.text_light_deuteranopia,
+        onPrimaryContainer = Colors.background_light_deuteranopia
+    )
+    val DarkDeuteranopia = darkColorScheme(
+        background = Colors.background_dark_deuteranopia,
+        onBackground = Colors.text_dark_deuteranopia,
+        primaryContainer = Colors.text_dark_deuteranopia,
+        onPrimaryContainer = Colors.background_dark_deuteranopia
+    )
+}
 
 @Composable
 fun JobderTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+    colorScheme: ColorScheme,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
-    }
-
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        content = content,
+        typography = Typography
     )
 }

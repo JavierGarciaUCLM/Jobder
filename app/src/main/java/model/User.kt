@@ -1,4 +1,3 @@
 package model
 
-class User {
-}
+class User

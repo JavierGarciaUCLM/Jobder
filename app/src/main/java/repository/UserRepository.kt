@@ -1,4 +1,3 @@
 package repository
 
-class UserRepository {
-}
+class UserRepository
