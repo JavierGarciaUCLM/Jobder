@@ -12,6 +12,7 @@ package com.example.jobder
 //import androidx.compose.material
 //import androidx.compose.material.icons.Icons
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -50,6 +51,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,6 +87,7 @@ object SharedState{
     val minScale = 0.8f
     val maxScale = 2f
     var language = mutableStateOf("Español")
+
     fun updateTheme() {
         SharedState.theme.value = when {
             // Protanopía
@@ -122,7 +125,7 @@ class MainActivity : ComponentActivity() {
             JobderTheme(colorScheme = SharedState.theme.value) {
 
 
-                val context = LocalContext.current
+                var context = LocalContext.current
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
                 val executor = Executors.newSingleThreadExecutor()
                 var selectedButtonIndex by remember { mutableStateOf(0) }
@@ -207,12 +210,18 @@ class MainActivity : ComponentActivity() {
                                     .width((200 * SharedState.scale.value).dp)
                                     .height((50 * SharedState.scale.value).dp)
                                     .semantics { contentDescription = "Select English language" },
-                                colors = ButtonColors(
-                                    SharedState.theme.value.onPrimaryContainer,
-                                    SharedState.theme.value.primaryContainer,
+                                colors =if (selectedButtonIndex == 0) {
+                                    ButtonColors(
+                                    SharedState.theme.value.primary,
+                                    SharedState.theme.value.onPrimary,
                                     SharedState.theme.value.secondaryContainer,
                                     SharedState.theme.value.onSecondary
-                                ),
+                                )}else{ButtonColors(
+                                    SharedState.theme.value.secondary,
+                                    SharedState.theme.value.onSecondary,
+                                    SharedState.theme.value.secondaryContainer,
+                                    SharedState.theme.value.onSecondary
+                                )},
                                 border = if (selectedButtonIndex == 0) BorderStroke(
                                     2.dp,
                                     Color.Blue
@@ -239,12 +248,18 @@ class MainActivity : ComponentActivity() {
                                     .height((50 * SharedState.scale.value).dp)
 
                                     .semantics { contentDescription = "Select French language" },
-                                colors = ButtonColors(
-                                    SharedState.theme.value.onPrimaryContainer,
-                                    SharedState.theme.value.primaryContainer,
+                                colors = if (selectedButtonIndex == 1) {
+                                    ButtonColors(
+                                        SharedState.theme.value.primary,
+                                        SharedState.theme.value.onPrimary,
+                                        SharedState.theme.value.secondaryContainer,
+                                        SharedState.theme.value.onSecondary
+                                    )}else{ButtonColors(
+                                    SharedState.theme.value.secondary,
+                                    SharedState.theme.value.onSecondary,
                                     SharedState.theme.value.secondaryContainer,
                                     SharedState.theme.value.onSecondary
-                                ),
+                                )},
                                 border = if (selectedButtonIndex == 1) BorderStroke(
                                     2.dp,
                                     Color.Blue
@@ -269,12 +284,18 @@ class MainActivity : ComponentActivity() {
                                     .width((200 * SharedState.scale.value).dp)
                                     .height((50 * SharedState.scale.value).dp)
                                     .semantics { contentDescription = "Select Spanish language" },
-                                colors = ButtonColors(
-                                    SharedState.theme.value.onPrimaryContainer,
-                                    SharedState.theme.value.primaryContainer,
+                                colors = if (selectedButtonIndex == 2) {
+                                    ButtonColors(
+                                        SharedState.theme.value.primary,
+                                        SharedState.theme.value.onPrimary,
+                                        SharedState.theme.value.secondaryContainer,
+                                        SharedState.theme.value.onSecondary
+                                    )}else{ButtonColors(
+                                    SharedState.theme.value.secondary,
+                                    SharedState.theme.value.onSecondary,
                                     SharedState.theme.value.secondaryContainer,
                                     SharedState.theme.value.onSecondary
-                                ),
+                                )},
                                 border = if (selectedButtonIndex == 2) BorderStroke(
                                     2.dp,
                                     Color.Blue
@@ -296,7 +317,7 @@ class MainActivity : ComponentActivity() {
                         Icon(
                             imageVector = Icons.Default.Menu,
                             contentDescription = "Menu",
-                            tint =SharedState.theme.value.onPrimaryContainer
+                            tint =SharedState.theme.value.background
                         )
                     }
                     IconButton(
@@ -500,7 +521,7 @@ class MainActivity : ComponentActivity() {
 
                                         }
 
-                                        println("Selected Language: ${appViewModel.getLanguage()}") // Debería imprimir el idioma seleccionado
+                                        //println("Selected Language: ${appViewModel.getLanguage()}") // Debería imprimir el idioma seleccionado
 
                                         val intent = Intent(this, LoginScreen::class.java)
 
@@ -571,7 +592,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        var (isDarkMode,language) = PreferencesHelper.loadPreferences(this)
+        //var (isDarkMode,language) = PreferencesHelper.loadPreferences(this)
         appViewModel.toggleIsNavigating()
         //appViewModel.toggleDarkMode()
     }

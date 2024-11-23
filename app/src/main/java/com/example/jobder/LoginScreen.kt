@@ -167,8 +167,8 @@ JobderTheme(colorScheme = SharedState.theme.value) {
                         Color.Blue
                     ) else null,
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(SharedState.theme.value.onPrimaryContainer,
-                        SharedState.theme.value.primaryContainer,
+                    colors = ButtonDefaults.buttonColors(SharedState.theme.value.primary,
+                        SharedState.theme.value.onPrimary,
                         SharedState.theme.value.secondaryContainer,
                         SharedState.theme.value.onSecondary)
                 ) {
@@ -200,15 +200,7 @@ JobderTheme(colorScheme = SharedState.theme.value) {
                                 if (smileDetected && !appViewModel.isNavigating.value) {
                                     Log.e("OhhYEah", "Sonrisa detectada!!")
                                     appViewModel.toggleIsNavigating()
-                                    val intent = Intent(this, NewLoginScreen::class.java).apply {
-                                        putExtra("language", language)
-                                        putExtra("isDarkMode", isDarkMode)
-                                    }
-                                    PreferencesHelper.savePreferences(
-                                        this,
-                                        isDarkMode,
-                                        language = language
-                                    )
+                                    val intent = Intent(this, NewLoginScreen::class.java)
                                     startActivity(intent)
                                 }
                             }

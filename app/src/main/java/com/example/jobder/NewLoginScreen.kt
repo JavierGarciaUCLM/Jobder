@@ -222,8 +222,8 @@ class NewLoginScreen:ComponentActivity() {
                             .height((50 * SharedState.scale.value).dp)
                         ,
                         colors = ButtonColors(
-                            SharedState.theme.value.onPrimaryContainer,
-                            SharedState.theme.value.primaryContainer,
+                            SharedState.theme.value.primary,
+                            SharedState.theme.value.onPrimary,
                             SharedState.theme.value.secondaryContainer,
                             SharedState.theme.value.onSecondary
                         ),

@@ -49,4 +49,32 @@ object Colors{
     //Colores para Tritanopía en modo oscuro
     val background_dark_tritanopia=Color(0xFF1D1D1D)
     val text_dark_tritanopia=Color(0xFFF0F0F0)
+
+    /******************Deuteranopia********************/
+    //Light
+    //Dark
+    /******************Tritanopia********************/
+    //Light
+    //Dark
+    /******************Protanopia********************/
+    //Light
+    val light_pro_on_background = Color(0xFFFFFFFF)
+    val light_pro_background = Color(0xFFFFFFFF)
+    val light_pro_primary = Color(0xFFFFFFFF)
+    val light_pro_on_primary = Color(0xFFFFFFFF)
+    //Dark
+    /******************Light********************/
+    val light_on_background = Color(0xFF000000)
+    val light_background = Color(0xFFFFFFFF)
+    val light_primary = Color(0xFFF5F5F5)
+    val light_on_primary = Color(0xFF000000)
+    val light_secondary = Color(0xFFE0E0E0)
+    val light_on_secondary = Color(0xFF000000)
+    /******************Dark********************/
+    val dark_on_background = Color(0xFFFFFFFF)
+    val dark_background = Color( 0xFF121212)
+    val dark_primary = Color(0xFF424242)
+    val dark_on_primary = Color(0xFFFFFFFF)
+    val dark_secondary = Color(0xFF757575)
+    val dark_on_secondary = Color(0xFFFFFFFF)
 }

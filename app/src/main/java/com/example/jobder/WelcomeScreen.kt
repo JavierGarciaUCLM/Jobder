@@ -15,15 +15,19 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -35,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -97,31 +102,17 @@ class WelcomeScreen: ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            if (isDarkMode) Color.Black.copy(alpha = 0.5f) else Color.White.copy(
+                            if (SharedState.darkModeIsChecked.value) Color.Black.copy(alpha = 0.5f) else Color.White.copy(
                                 alpha = 0.5f
                             )
                         )
                 )
-                IconButton(
-                    onClick = {
-                        isDarkMode = !isDarkMode
-                    }, // Cambia el modo oscuro
-                    modifier = Modifier
-                        //.align(Alignment.TopEnd)
-                        .padding(16.dp)
-                ) {
-                    val icon = if (isDarkMode) {
-                        painterResource(id = R.drawable.ic_sun) // Icono de sol
-                    } else {
-                        painterResource(id = R.drawable.ic_moon) // Icono de luna
-                    }
-                    Image(painter = icon, contentDescription = null)
-                }
+
                 // Logo de la app en la parte superior
-                val logo = if (isDarkMode) {
-                    painterResource(id = R.drawable.img) // Logo en modo oscuro
+                val logo = if (SharedState.darkModeIsChecked.value) {
+                    painterResource(id = R.mipmap.ic_launcher_foreground) // Logo en modo oscuro
                 } else {
-                    painterResource(id = R.drawable.light_mode_icon) // Logo en modo claro
+                    painterResource(id = R.mipmap.img) // Logo en modo claro
                 }
                 Image(
                     painter = logo, // Reemplaza con el logo correcto
@@ -131,86 +122,151 @@ class WelcomeScreen: ComponentActivity() {
                         .align(Alignment.TopCenter)
                         .padding(top = 50.dp)
                 )
-
-                // Caja central para contener los botones y el texto
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.Center)
-                        .padding(16.dp)
-                        .background(
-                            color = Color.White.copy(alpha = 0.9f),
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(24.dp),
+                        .fillMaxSize()
+                        .pointerInput(Unit) {
+                            detectTransformGestures { _, _, zoom, _ ->
+                                SharedState.scale.value = (SharedState.scale.value * zoom).coerceIn(SharedState.minScale, SharedState.maxScale)
+                            }
+                        },
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                    // Caja central para contener los botones y el texto
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center)
+                            .padding(16.dp)
+                            .background(
+                                color = SharedState.theme.value.background,
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Texto de bienvenida
-                        Text(
-                            text = getTranslation("welcome_to_jobder", SharedState.language.value),
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.Black,
-                            modifier = Modifier.padding(bottom = 20.dp),
-                            textAlign = TextAlign.Center
-                        )
-
-                        // Botón de "Join as a User"
-                        Button(
-                            onClick = {
-                                intent = Intent(context, SwipeCompanyScreen::class.java)
-                                startActivity(intent)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            colors = ButtonDefaults.buttonColors(Color(0xFF0277BD)),
-                            border = if (selectedButtonIndex == 0) BorderStroke(
-                                2.dp,
-                                Color.Blue
-                            ) else null,
-                            shape = RoundedCornerShape(8.dp)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
                         ) {
+                            // Texto de bienvenida
                             Text(
-                                text = getTranslation("join_as_a_user", SharedState.language.value),
-                                color = Color.White
+                                text = getTranslation(
+                                    "welcome_to_jobder",
+                                    SharedState.language.value
+                                ),
+                                fontSize = (16 * SharedState.scale.value).sp,
+                                fontWeight = FontWeight.Bold,
+                                color = SharedState.theme.value.onBackground,
+                                modifier = Modifier.padding(bottom = 20.dp),
+                                textAlign = TextAlign.Center
                             )
+
+                            // Botón de "Join as a User"
+                            Button(
+                                onClick = {
+                                    intent = Intent(context, SwipeCompanyScreen::class.java)
+                                    startActivity(intent)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                colors = if (selectedButtonIndex == 0) {
+                                    ButtonColors(
+                                        SharedState.theme.value.primary,
+                                        SharedState.theme.value.onPrimary,
+                                        SharedState.theme.value.secondaryContainer,
+                                        SharedState.theme.value.onSecondary
+                                    )}else{ButtonColors(
+                                    SharedState.theme.value.secondary,
+                                    SharedState.theme.value.onSecondary,
+                                    SharedState.theme.value.secondaryContainer,
+                                    SharedState.theme.value.onSecondary
+                                )},
+                                border = if (selectedButtonIndex == 0) BorderStroke(
+                                    2.dp,
+                                    Color.Blue
+                                ) else null,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = getTranslation(
+                                        "join_as_a_user",
+                                        SharedState.language.value
+                                    ),
+
+                                    //color = Color.White,
+                                    fontSize = (16 * SharedState.scale.value).sp
+                                )
+                            }
+
+                            // Botón de "Join as a Company"
+                            Button(
+                                onClick = {
+                                    intent = Intent(context, SwipePersonScreen::class.java)
+                                    startActivity(intent)
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(bottom = 16.dp),
+                                colors =if (selectedButtonIndex == 1) {
+                                    ButtonColors(
+                                        SharedState.theme.value.primary,
+                                        SharedState.theme.value.onPrimary,
+                                        SharedState.theme.value.secondaryContainer,
+                                        SharedState.theme.value.onSecondary
+                                    )}else{ButtonColors(
+                                    SharedState.theme.value.secondary,
+                                    SharedState.theme.value.onSecondary,
+                                    SharedState.theme.value.secondaryContainer,
+                                    SharedState.theme.value.onSecondary
+                                )},
+                                border = if (selectedButtonIndex == 1) BorderStroke(
+                                    2.dp,
+                                    Color.Blue
+                                ) else null,
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text(
+                                    text = getTranslation(
+                                        "join_as_a_company",
+                                        SharedState.language.value
+                                    ),
+                                    //color = Color.White,
+                                    fontSize = (16 * SharedState.scale.value).sp
+                                )
+                            }
+
+                            // Texto de "Forgot password?"
+                            Text(
+                                text = getTranslation(
+                                    "forgot_password",
+                                    SharedState.language.value
+                                ),
+                                color = SharedState.theme.value.onBackground,
+                                fontSize = (16 * SharedState.scale.value).sp,
+                                modifier = Modifier.padding(top = 10.dp),
+                                textAlign = TextAlign.Center
+                            )
+
                         }
 
-                        // Botón de "Join as a Company"
-                        Button(
-                            onClick = {
-                                intent = Intent(context,SwipePersonScreen::class.java)
-                                startActivity(intent)
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 16.dp),
-                            colors = ButtonDefaults.buttonColors(Color(0xFF0277BD)),
-                            border = if (selectedButtonIndex == 1) BorderStroke(
-                                2.dp,
-                                Color.Blue
-                            ) else null,
-                            shape = RoundedCornerShape(8.dp)
-                        ) {
-                            Text(
-                                text = getTranslation("join_as_a_company", SharedState.language.value),
-                                color = Color.White
-                            )
+                    }
+                    IconButton(
+                        onClick = {
+                            SharedState.darkModeIsChecked.value = !SharedState.darkModeIsChecked.value
+                            SharedState.updateTheme()
+                        }, // Cambia el modo oscuro
+                        modifier = Modifier
+                            .align(Alignment.TopStart)
+                            .padding(16.dp)
+                    ) {
+                        val icon = if (SharedState.darkModeIsChecked.value) {
+                            painterResource(id = R.drawable.baseline_light_mode_24) // Icono de sol
+                        } else {
+                            painterResource(id = R.drawable.baseline_dark_mode_24) // Icono de luna
                         }
-
-                        // Texto de "Forgot password?"
-                        Text(
-                            text = getTranslation("forgot_password", SharedState.language.value),
-                            color = Color(0xFF0277BD),
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(top = 10.dp),
-                            textAlign = TextAlign.Center
-                        )
+                        Image(painter = icon, contentDescription = null)
                     }
                 }
             }
