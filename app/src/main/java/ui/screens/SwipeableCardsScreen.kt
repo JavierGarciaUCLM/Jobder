@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -48,7 +49,19 @@ fun SwipeableCardsScreen() {
                 onSwipeRight = { coroutineScope.launch { removeCompany() } }
             )
         } else {
-            Text(text = "No more companies", fontSize = 24.sp)
+            //Text(text = "No more companies", fontSize = 24.sp)
+//            Image(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                , painter = painterResource(id = R.drawable.matchUCLM)
+//            )
+            Image(
+                painter = painterResource(id=R.drawable.matchuclm),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+                )
+            //painterResource(id = R.drawable.matchuclm)
         }
     }
 }

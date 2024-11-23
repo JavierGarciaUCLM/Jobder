@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -34,9 +35,9 @@ fun SwipeableCardsScreenPerson() {
         mutableStateListOf(
             R.drawable.persona1,
             R.drawable.persona2,
-            R.drawable.persona3,
-            R.drawable.persona4,
             R.drawable.persona5,
+            R.drawable.persona4,
+            R.drawable.persona3,
         )
     }
     val coroutineScope = rememberCoroutineScope()
@@ -58,7 +59,13 @@ fun SwipeableCardsScreenPerson() {
                 onSwipeRight = { coroutineScope.launch { removePersona() } }
             )
         } else {
-            Text(text = "No more people", fontSize = 24.sp)
+            //Text(text = "No more people", fontSize = 24.sp)
+            Image(
+                painter = painterResource(id=R.drawable.matchjaime),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 }
