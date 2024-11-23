@@ -1,5 +1,6 @@
 package com.example.jobder
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -14,15 +15,19 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,44 +35,65 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
+import ui.theme.JobderTheme
 import ui.utils.getTranslation
 import java.util.concurrent.Executors
 
 /***************************** LoginScreen *****************************/
-public class LoginScreen:ComponentActivity() {
+class LoginScreen:ComponentActivity() {
     //private var isNavigating = false
-    private lateinit var language: String
+    //private lateinit var language: String
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
-        language = intent.getStringExtra("language") ?: ""
         appViewModel.toggleIsNavigating()
+        var (isDarkMode, language) = PreferencesHelper.loadPreferences(this)
         println("Iniciando LoginScreen.kt")
         //language = intent.getStringExtra("selectedLanguage") ?: ""
         //appViewModel = ViewModelProvider(this).get(AppViewModel::class.java)
         setContent {
+JobderTheme(colorScheme = SharedState.theme.value) {
             val context = LocalContext.current
+            //language = intent.getStringExtra("language") ?: ""
             val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
-            val isDarkMode by appViewModel.isDarkMode // Obtiene el estado de modo oscuro
+            //var isDarkMode by remember{ mutableStateOf(false) }
+
+            //isDarkMode = intent.getBooleanExtra("isDarkMode",false)
+            // Recuperar el valor del Intent
+//            LaunchedEffect(Unit) {
+//                val intent = (context as? Activity)?.intent
+//                isDarkMode = intent?.getBooleanExtra("isDarkMode", false) ?: false
+//            }
+            //val isDarkMode = appViewModel.isDarkMode // Obtiene el estado de modo oscuro
             //val language by  appViewModel.selectedLanguage
             //appViewModel.toggleIsNavitaing()
             // Fondo basado en el modo oscuro
-            val backgroundModifier = if (isDarkMode) {
-                Modifier.fillMaxSize().background(Color.Gray)
+            val backgroundModifier = if (SharedState.darkModeIsChecked.value) {
+                Modifier.fillMaxSize().background(Color.Gray) .pointerInput(Unit) {
+                    detectTransformGestures { _, _, zoom, _ ->
+                        SharedState.scale.value = (SharedState.scale.value * zoom).coerceIn(SharedState.minScale, SharedState.maxScale)
+                    }
+                }
             } else {
-                Modifier.fillMaxSize()
+                Modifier.fillMaxSize() .pointerInput(Unit) {
+                    detectTransformGestures { _, _, zoom, _ ->
+                        SharedState.scale.value = (SharedState.scale.value * zoom).coerceIn(SharedState.minScale, SharedState.maxScale)
+                    }
+                }
             }
             Box(modifier = backgroundModifier) {
 
@@ -75,6 +101,7 @@ public class LoginScreen:ComponentActivity() {
                 Image(
                     painter = painterResource(id = R.drawable.ohyeah),
                     contentDescription = null,
+                    alpha = 0.4f,
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Crop
                 )
@@ -83,13 +110,14 @@ public class LoginScreen:ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            if (isDarkMode) Color.Black.copy(alpha = 0.5f) else Color.White.copy(
+                            if (SharedState.darkModeIsChecked.value) Color.Black.copy(alpha = 0.5f) else Color.White.copy(
                                 alpha = 0.5f
                             )
                         )
                 )
+
                 // Logo
-                val logo = if (isDarkMode) {
+                val logo = if (SharedState.darkModeIsChecked.value) {
                     painterResource(id = R.drawable.img) // Logo en modo oscuro
                 } else {
                     painterResource(id = R.drawable.light_mode_icon) // Logo en modo claro
@@ -102,19 +130,22 @@ public class LoginScreen:ComponentActivity() {
                         .align(Alignment.TopCenter)
                         .padding(top = 50.dp)
                 )
-                // Botón de cambio de modo oscuro
+// Botón de cambio de modo oscuro
                 IconButton(
                     onClick = {
-                        appViewModel.isDarkMode.value = !isDarkMode
+                        SharedState.darkModeIsChecked.value = !SharedState.darkModeIsChecked.value
+                        SharedState.updateTheme()
+                        //isDarkMode = !isDarkMode
+                        //PreferencesHelper.savePreferences(context,isDarkMode, language = language)
                     }, // Cambia el modo oscuro
                     modifier = Modifier
-                        .align(Alignment.TopEnd)
+                        //.align(Alignment.TopEnd)
                         .padding(16.dp)
                 ) {
-                    val icon = if (isDarkMode) {
-                        painterResource(id = R.drawable.ic_sun) // Icono de sol
+                    val icon = if (SharedState.darkModeIsChecked.value) {
+                        painterResource(id = R.drawable.baseline_light_mode_24) // Icono de sol
                     } else {
-                        painterResource(id = R.drawable.ic_moon) // Icono de luna
+                        painterResource(id = R.drawable.baseline_dark_mode_24) // Icono de luna
                     }
                     Image(painter = icon, contentDescription = null)
                 }
@@ -122,20 +153,26 @@ public class LoginScreen:ComponentActivity() {
                 // Botón de Log in
                 Button(
                     onClick = {
-                        // Navegar a la nueva pantalla de inicio de sesión
-                        //navController.navigate("new_login_screen")
+                        val intent = Intent(context, NewLoginScreen::class.java)
+                        startActivity(intent)
                     },
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 50.dp),
-                            border = if (selectedButtonIndex == 0) BorderStroke(
+                        .padding(bottom = 50.dp)
+                        .width((200 * SharedState.scale.value).dp)
+                        .height((50 * SharedState.scale.value).dp)
+                        ,
+                    border = if (selectedButtonIndex == 0) BorderStroke(
                         2.dp,
                         Color.Blue
                     ) else null,
                     shape = RoundedCornerShape(8.dp),
-                    colors = ButtonDefaults.buttonColors(Color(0xFF0277BD))
+                    colors = ButtonDefaults.buttonColors(SharedState.theme.value.primary,
+                        SharedState.theme.value.onPrimary,
+                        SharedState.theme.value.secondaryContainer,
+                        SharedState.theme.value.onSecondary)
                 ) {
-                    Text(getTranslation("login", language))
+                    Text(getTranslation("login", SharedState.language.value), fontSize = (16 * SharedState.scale.value).sp)
                 }
             }
             cameraProviderFuture.addListener({
@@ -161,9 +198,9 @@ public class LoginScreen:ComponentActivity() {
                                     selectedButtonIndex = (selectedButtonIndex + 1) % 1
                                 }
                                 if (smileDetected && !appViewModel.isNavigating.value) {
-                                    Log.e("OhhYEah","Sonrisa detectada!!")
+                                    Log.e("OhhYEah", "Sonrisa detectada!!")
                                     appViewModel.toggleIsNavigating()
-                                    val intent = Intent(this, NewLoginScreen::class.java).apply { putExtra("language",language) }
+                                    val intent = Intent(this, NewLoginScreen::class.java)
                                     startActivity(intent)
                                 }
                             }
@@ -182,6 +219,7 @@ public class LoginScreen:ComponentActivity() {
                 }
             }, ContextCompat.getMainExecutor(context))
         }
+    }
     }
         @OptIn(ExperimentalGetImage::class)
         private fun processImageProxy(

@@ -6,12 +6,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.AndroidViewModel
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
-    var isDarkMode = mutableStateOf(false)
+    var isDarkMode = false
     private var selectedLanguage = mutableStateOf(0) // Valor inicial vacío
     var isNavigating = mutableStateOf(false)
 
     fun toggleDarkMode() {
-        isDarkMode.value = !isDarkMode.value
+        isDarkMode = !isDarkMode
     }
 
     fun toggleIsNavigating() {

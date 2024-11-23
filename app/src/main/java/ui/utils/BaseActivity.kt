@@ -8,6 +8,9 @@ import java.util.Locale
 open class BaseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private lateinit var tts: TextToSpeech
     private var isTtsInitialized = false
+    companion object{
+        var darkModeIsSelected = false
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

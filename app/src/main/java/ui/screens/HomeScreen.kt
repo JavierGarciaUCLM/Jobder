@@ -1,4 +1,3 @@
 package ui.screens
 
-class HomeScreen {
-}
+class HomeScreen
