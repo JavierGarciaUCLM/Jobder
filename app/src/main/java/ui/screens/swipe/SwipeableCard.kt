@@ -9,11 +9,17 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -24,12 +30,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.jobder.R
+import com.example.jobder.SharedState
 
 // Define los posibles estados de la tarjeta
 enum class SwipeDirection {
@@ -74,13 +82,15 @@ fun SwipeableCard(
 
     Box(
         modifier = modifier
+
             .fillMaxSize()
-            .height(300.dp)
+
+            .clip(RoundedCornerShape(10.dp))
             .graphicsLayer(
                 translationX = animatedOffsetX, // Mueve la tarjeta con animación
                 rotationZ = rotationDegree // Aplica la rotación a la tarjeta
             )
-            .background(Color.White, shape = RoundedCornerShape(10.dp))
+            .background(SharedState.theme.value.background, shape = RoundedCornerShape(10.dp))
             .draggable(
                 orientation = Orientation.Horizontal,
                 state = rememberDraggableState { delta ->
@@ -107,13 +117,116 @@ fun SwipeableCard(
             )
             .padding(16.dp)
     ) {
+        val logo = if (SharedState.darkModeIsChecked.value) {
+            painterResource(id = R.mipmap.ic_launcher_foreground) // Logo en modo oscuro
+        } else {
+            painterResource(id = R.mipmap.img) // Logo en modo claro
+        }
+
+        //Spacer(modifier = Modifier.height(16.dp))
         // Contenido de la tarjeta
         Image(
             painter = painterResource(id = item),
             contentDescription = null,
-            modifier = Modifier.align(Alignment.Center),
-            contentScale = ContentScale.Crop
+            modifier =
+            Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(50.dp))
+                //.align(Alignment.Center)
+
+
+
         )
+//        Row(
+//            modifier = Modifier
+//                .align(Alignment.TopCenter)
+//        ) {
+            IconButton(
+               onClick = {},
+                modifier = Modifier
+                    .size(40.dp)
+                    .align(Alignment.TopStart)
+                    //.align(Alignment.TopEnd)
+                    .padding(top = 10.dp)
+
+            ){Image( painter = painterResource(id = R.drawable.topstart),
+modifier = Modifier.fillMaxSize(),
+                contentDescription = null)}
+            IconButton(
+
+                modifier = Modifier
+                    .size(40.dp)
+                    .align(Alignment.TopCenter)
+                    .padding(top = 10.dp),
+                onClick = {}
+            ){Image(logo,contentDescription = null)}
+            IconButton(
+                onClick = {},
+                modifier = Modifier
+                    .size(40.dp)
+                    .align(Alignment.TopEnd)
+                    .padding(top = 10.dp)
+            ){Image(painter = painterResource(id = R.drawable.chat),
+modifier = Modifier.fillMaxSize(),
+                contentDescription = null)}
+        Row(modifier = Modifier.align(Alignment.BottomCenter)){
+        Box(
+            modifier = Modifier
+                .size(70.dp) // Tamaño del círculo
+                .clip(CircleShape) // Hace la caja circular
+                .background(Color.White)
+                .padding(10.dp)
+                ,//.align(Alignment.BottomStart), // Fondo del círculo
+            contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
+        ){
+            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.volver), contentDescription = null,modifier = Modifier.size(50.dp)) }
+        }
+        Box(
+            modifier = Modifier
+                .size(70.dp) // Tamaño del círculo
+                .clip(CircleShape) // Hace la caja circular
+                .background(Color.White)
+                .padding(10.dp)
+                ,//.align(Alignment.BottomCenter), // Fondo del círculo
+            contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
+        ){
+            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.rechazar), contentDescription = null,modifier = Modifier.size(50.dp)) }
+        }
+        Box(
+            modifier = Modifier
+                .size(70.dp) // Tamaño del círculo
+                .clip(CircleShape) // Hace la caja circular
+                .background(Color.White)
+                .padding(10.dp)
+                ,//.align(Alignment.BottomCenter), // Fondo del círculo
+            contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
+        ){
+            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.estrella), contentDescription = null,modifier = Modifier.size(50.dp)) }
+        }
+        Box(
+            modifier = Modifier
+                .size(70.dp) // Tamaño del círculo
+                .clip(CircleShape) // Hace la caja circular
+                .background(Color.White)
+                .padding(10.dp)
+                ,//.align(Alignment.BottomCenter), // Fondo del círculo
+            contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
+        ){
+            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.corazoncito), contentDescription = null,modifier=Modifier.size(50.dp)) }
+        }
+        Box(
+            modifier = Modifier
+                .size(70.dp) // Tamaño del círculo
+                .clip(CircleShape) // Hace la caja circular
+                .background(Color.White)
+                .padding(10.dp)
+                ,//.align(Alignment.BottomEnd), // Fondo del círculo
+            contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
+        ){
+            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.rayito), contentDescription = null,modifier=Modifier.size(50.dp)) }
+        }}
+
+//        }
 
         // Mostrar texto YES/NOPE basado en el estado de deslizamiento
         when (swipeState) {
