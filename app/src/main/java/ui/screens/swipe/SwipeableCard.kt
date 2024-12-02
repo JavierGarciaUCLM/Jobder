@@ -185,12 +185,10 @@ fun SwipeableCard(
                     .size(30.dp)
                     .align(Alignment.TopEnd)
                     .padding(top = 10.dp)
-            ){
-                    Image(
-
-                painter = painterResource(id = R.drawable.chat),
-                modifier = Modifier.fillMaxSize(),
-                contentDescription = null
+            ){ Image(
+                    painter = painterResource(id = R.drawable.chat),
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = null
                 )
             }
         Row(modifier = Modifier.align(Alignment.BottomCenter)){
