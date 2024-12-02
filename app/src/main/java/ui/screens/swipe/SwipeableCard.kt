@@ -1,4 +1,6 @@
 package ui.screens.swipe
+import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -33,11 +35,19 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.startActivity
+import com.example.jobder.Augmented_Reality_Activity
+import com.example.jobder.NewLoginScreen
 import com.example.jobder.R
 import com.example.jobder.SharedState
+import io.github.sceneview.Scene
+import io.github.sceneview.math.Position
+import io.github.sceneview.node.ModelNode
+import io.github.sceneview.node.Node
 
 // Define los posibles estados de la tarjeta
 enum class SwipeDirection {
@@ -55,7 +65,8 @@ fun SwipeableCard(
     // Variable para el desplazamiento de la tarjeta
     var offsetX by remember { mutableStateOf(0f) }
     val swipeThreshold = 20f // Reducir el umbral para detectar el gesto de deslizamiento
-
+    //var isRejectedPressed by remember { mutableStateOf(false) }
+    //var isAcceptedPressed by remember { mutableStateOf(false) }
     // Animar el desplazamiento de la tarjeta para una transición suave
     val animatedOffsetX by animateFloatAsState(
         targetValue = offsetX,
@@ -149,26 +160,39 @@ fun SwipeableCard(
                     //.align(Alignment.TopEnd)
                     .padding(top = 10.dp)
 
-            ){Image( painter = painterResource(id = R.drawable.topstart),
-modifier = Modifier.fillMaxSize(),
-                contentDescription = null)}
+            ){
+                Image(
+                    painter = painterResource(id = R.drawable.topstart),
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = null
+                )
+            }
             IconButton(
 
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(30.dp)
                     .align(Alignment.TopCenter)
                     .padding(top = 10.dp),
                 onClick = {}
-            ){Image(logo,contentDescription = null)}
-            IconButton(
-                onClick = {},
+            ){
+                Image(
+                    logo,contentDescription = null
+                )
+            }
+                IconButton(
+                    onClick = {},
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(30.dp)
                     .align(Alignment.TopEnd)
                     .padding(top = 10.dp)
-            ){Image(painter = painterResource(id = R.drawable.chat),
-modifier = Modifier.fillMaxSize(),
-                contentDescription = null)}
+            ){
+                    Image(
+
+                painter = painterResource(id = R.drawable.chat),
+                modifier = Modifier.fillMaxSize(),
+                contentDescription = null
+                )
+            }
         Row(modifier = Modifier.align(Alignment.BottomCenter)){
         Box(
             modifier = Modifier
@@ -179,7 +203,16 @@ modifier = Modifier.fillMaxSize(),
                 ,//.align(Alignment.BottomStart), // Fondo del círculo
             contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
         ){
-            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.volver), contentDescription = null,modifier = Modifier.size(50.dp)) }
+            IconButton(
+                onClick = {},
+                modifier = Modifier.size(50.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.volver),
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
         }
         Box(
             modifier = Modifier
@@ -190,7 +223,16 @@ modifier = Modifier.fillMaxSize(),
                 ,//.align(Alignment.BottomCenter), // Fondo del círculo
             contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
         ){
-            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.rechazar), contentDescription = null,modifier = Modifier.size(50.dp)) }
+            IconButton(
+                onClick = {
+                    //isRejectedPressed = true
+                },
+                modifier = Modifier.size(50.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.rechazar),
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)) }
         }
         Box(
             modifier = Modifier
@@ -201,7 +243,15 @@ modifier = Modifier.fillMaxSize(),
                 ,//.align(Alignment.BottomCenter), // Fondo del círculo
             contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
         ){
-            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.estrella), contentDescription = null,modifier = Modifier.size(50.dp)) }
+            IconButton(
+                onClick = {},
+                modifier = Modifier.size(50.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.estrella),
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                ) }
         }
         Box(
             modifier = Modifier
@@ -212,7 +262,19 @@ modifier = Modifier.fillMaxSize(),
                 ,//.align(Alignment.BottomCenter), // Fondo del círculo
             contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
         ){
-            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.corazoncito), contentDescription = null,modifier=Modifier.size(50.dp)) }
+            IconButton(
+                onClick = {
+                    //isAcceptedPressed = true
+                    //coroutine.Launc{removePersona()}
+                },
+                modifier = Modifier.size(50.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.corazoncito),
+                    contentDescription = null,
+                    modifier=Modifier.size(30.dp)
+                )
+            }
         }
         Box(
             modifier = Modifier
@@ -223,8 +285,21 @@ modifier = Modifier.fillMaxSize(),
                 ,//.align(Alignment.BottomEnd), // Fondo del círculo
             contentAlignment = Alignment.Center // Centra el contenido dentro del círculo
         ){
-            IconButton(onClick = {},modifier = Modifier.size(50.dp)) { Image(painter = painterResource(id = R.drawable.rayito), contentDescription = null,modifier=Modifier.size(50.dp)) }
-        }}
+            IconButton(
+                onClick = {
+//                    val intent = Intent(LocalContext.current, Augmented_Reality_Activity::class.java)
+//                    startActivity(intent)
+                },
+                modifier = Modifier.size(50.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.rayito),
+                    contentDescription = null,
+                    modifier=Modifier.size(30.dp)
+                )
+            }
+        }
+        }
 
 //        }
 
@@ -277,4 +352,26 @@ modifier = Modifier.fillMaxSize(),
             }
         }
     }
+
+}
+@Composable
+fun ModelScreen(){
+    val context = LocalContext.current
+    val nodes = remember{
+        mutableListOf<Node>()
+    }
+    Scene(modifier = Modifier.fillMaxSize(),nodes=nodes,onCreate={
+        val model = ModelNode()
+        model.loadModelGlbAsync(
+            context = context,
+            glbFileLocation = "models/oficina.glb",
+            autoAnimate = true,
+            scaleToUnits = 0.5f,
+            centerOrigin = Position(0.0f,0.0f,0.0f),
+            onError = {
+                Log.e("SceneView",it.message.toString())
+
+            })
+        nodes.add(model)
+    })
 }

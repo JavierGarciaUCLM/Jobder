@@ -54,6 +54,13 @@ android {
 }
 
 dependencies {
+    //librerías para reconocimiento de voz
+    implementation ("androidx.compose.ui:ui:1.6.0")
+    //implementation ("androidx.compose.material:material:1.6.0")
+    //implementation ("androidx.activity:activity-compose:1.7.2")
+    //La librería de abajo es para Augmented Reality
+    implementation("io.github.sceneview:arsceneview:0.9.7")
+
     implementation ("androidx.activity:activity-compose:1.7.0")
     implementation ("androidx.compose.ui:ui:1.5.0")
     implementation ("androidx.compose.material:material:1.5.0")
@@ -115,4 +122,5 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("androidx.core:core-ktx:1.7.0")
+    implementation(kotlin("script-runtime"))
 }

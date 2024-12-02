@@ -1,11 +1,17 @@
 package com.example.jobder
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognizerIntent
+import android.speech.SpeechRecognizer
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.OptIn
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ExperimentalGetImage
@@ -36,6 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,6 +53,7 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import ui.utils.getTranslation
 import com.example.jobder.AppViewModel
+import java.util.Locale
 import java.util.concurrent.Executors
 
 class NewLoginScreen:ComponentActivity() {
@@ -72,8 +80,63 @@ class NewLoginScreen:ComponentActivity() {
             //val isDarkMode = appViewModel.isDarkMode.value // Obtiene el estado de modo oscuro
             // Variables para almacenar el correo electrónico y la contraseña
             var email by remember {mutableStateOf("")}
-            var password by remember {mutableStateOf("")}
+            //var password by remember {mutableStateOf("")}
+            ///////////////////////////////////////////////////////////////////////
+            // SPEECH TO TEXT
+            //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+            //val context = LocalContext.current
+            var username by remember { mutableStateOf(TextFieldValue("")) }
+            var password by remember { mutableStateOf(TextFieldValue("")) }
+            var speechRecognizer: SpeechRecognizer? = remember { SpeechRecognizer.createSpeechRecognizer(context) }
+            var isListening by remember { mutableStateOf(false) }
 
+            // Configuración de SpeechRecognizer
+            DisposableEffect(Unit) {
+                val listener = object : android.speech.RecognitionListener {
+                    override fun onReadyForSpeech(params: Bundle?) {}
+                    override fun onBeginningOfSpeech() {}
+                    override fun onRmsChanged(rmsdB: Float) {}
+                    override fun onBufferReceived(buffer: ByteArray?) {}
+                    override fun onEndOfSpeech() {}
+                    override fun onError(error: Int) {
+                        isListening = false
+                        Toast.makeText(context, "Error: $error", Toast.LENGTH_SHORT).show()
+                    }
+                    override fun onResults(results: Bundle?) {
+                        isListening = false
+                        val spokenText = results?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)?.firstOrNull()
+                        if (!spokenText.isNullOrEmpty()) {
+                            if(SharedState.username.value.text.isEmpty())
+                                SharedState.username.value = TextFieldValue(spokenText)
+                            else
+                                SharedState.password.value = TextFieldValue(spokenText)
+                        }
+                    }
+                    override fun onPartialResults(partialResults: Bundle?) {}
+                    override fun onEvent(eventType: Int, params: Bundle?) {}
+                }
+
+                speechRecognizer?.setRecognitionListener(listener)
+                onDispose {
+                    speechRecognizer?.destroy()
+                }
+            }
+
+            // Solicitar permisos
+            val requestPermissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                if (!isGranted) {
+                    Toast.makeText(context, "Se necesita permiso para usar el micrófono", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            LaunchedEffect(Unit) {
+                requestPermissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            }
+            ///////////////////////////////////////////////////////////////////////
+            // SPEECH TO TEXT
+            //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
             //var isDarkMode by remember { mutableStateOf(false) }
             //isDarkMode = intent.getBooleanExtra("isDarkMode",false)
 //            LaunchedEffect(Unit) {
@@ -169,14 +232,14 @@ class NewLoginScreen:ComponentActivity() {
 
                     // Campo de texto para el email
                     BasicTextField(
-                        value = email,
-                        onValueChange = {email = it},
+                        value = SharedState.username.value,
+                        onValueChange = {SharedState.username.value = it},
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color.White, shape = MaterialTheme.shapes.small)
                             .padding(16.dp),
                         decorationBox = {innerTextField ->
-                            if (email.isEmpty()) {
+                            if (SharedState.username.value.text.isEmpty()) {
                                 Text(text = getTranslation("email", SharedState.language.value), color = Color.Gray, fontSize = (16 * SharedState.scale.value).sp)
                             }
                             innerTextField()
@@ -187,16 +250,19 @@ class NewLoginScreen:ComponentActivity() {
 
                     // Campo de texto para la contraseña
                     BasicTextField(
-                        value = password,
-                        onValueChange = {password = it},
+                        value = SharedState.password.value,
+                        onValueChange = {SharedState.password.value = it},
                         modifier = Modifier
                             .fillMaxWidth()
                             .background(Color.White, shape = MaterialTheme.shapes.small)
                             .padding(16.dp),
-                        visualTransformation = PasswordVisualTransformation(),
+                        //visualTransformation = PasswordVisualTransformation(),
                         decorationBox = {innerTextField ->
-                            if (password.isEmpty()) {
-                                Text(text = getTranslation("password", SharedState.language.value), color = Color.Gray, fontSize = (16 * SharedState.scale.value).sp)
+                            if (SharedState.password.value.text.isEmpty()) {
+                                Text(
+                                    text = getTranslation("password", SharedState.language.value),
+                                    color = Color.Gray,
+                                    fontSize = (16 * SharedState.scale.value).sp)
                             }
                             innerTextField()
                         }
@@ -243,7 +309,44 @@ class NewLoginScreen:ComponentActivity() {
                         modifier = Modifier.padding(top = 10.dp),
                         textAlign = TextAlign.Center
                     )
-
+                    ////////////////////////////////////////////////////////////
+                    // Botón para lo de la voz
+                    //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                    androidx.compose.material.IconButton(
+                        onClick = {
+                            if (!isListening) {
+                                val intent =
+                                    Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                        putExtra(
+                                            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                                            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+                                        )
+                                        putExtra(
+                                            RecognizerIntent.EXTRA_LANGUAGE,
+                                            Locale.getDefault()
+                                        )
+                                    }
+                                speechRecognizer?.startListening(intent)
+                                isListening = true
+                            } else {
+                                speechRecognizer?.stopListening()
+                                isListening = false
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Image(
+                            painter =
+                            if (isListening)
+                                painterResource(id = R.drawable.baseline_mic_24)
+                            else
+                                painterResource(id = R.drawable.baseline_mic_off_24),
+                            contentDescription = null
+                        )
+                    }
+                    ////////////////////////////////////////////////////////////
+                    // Botón para lo de la voz
+                    //\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
                     // Botón para ir a la pantalla de registro (sign-up)
 //            Box(
