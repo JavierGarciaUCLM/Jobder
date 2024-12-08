@@ -133,11 +133,11 @@ class MainActivity : ComponentActivity() {
 
         //var currentIndex by remember { mutableStateOf(0) }
         //val context = LocalContext.current
-        val languages = listOf("Español", "English", "Français")
-        val buttons = listOf("Botón", "Button", "Bouton")
-        val clicking_on = listOf("Haciendo clic en", "Clicking on", "en cliquant sur")
-        val selected_button = listOf("Botón seleccionado", "Selected Button", "Bouton sélectionné")
-        val languageLocales = listOf(Locale("es", "ES"), Locale.UK, Locale.FRENCH)
+        val languages = listOf( "English", "Français","Español")
+        val buttons = listOf( "Button", "Bouton","Botón")
+        val clicking_on = listOf( "Clicking on", "en cliquant sur","Haciendo clic en")
+        val selected_button = listOf( "Selected Button", "Bouton sélectionné","Botón seleccionado")
+        val languageLocales = listOf( Locale.UK, Locale.FRENCH,Locale("es", "ES"))
 
         // Cambia el idioma del TTS según el índice actual
         fun updateTTSLanguage(index: Int) {
@@ -260,7 +260,7 @@ class MainActivity : ComponentActivity() {
                                     SharedState.scale.value = (SharedState.scale.value * zoom).coerceIn(SharedState.minScale, SharedState.maxScale)
                                 }
                             }
-                            .background(Color.LightGray)
+
                             .then(gestureModifier),
                         contentAlignment = Alignment.Center
                     ) {
