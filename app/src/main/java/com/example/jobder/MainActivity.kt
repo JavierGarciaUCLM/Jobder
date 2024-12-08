@@ -115,14 +115,14 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var appViewModel: AppViewModel
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        println("Iniciando MainScreen.kt")
+            super.onCreate(savedInstanceState)
+            println("Iniciando MainScreen.kt")
 
-        appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
-        appViewModel.toggleIsNavigating()
-        val (isDarkMode, language) = PreferencesHelper.loadPreferences(this)
+            appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
+            appViewModel.toggleIsNavigating()
+            val (isDarkMode, language) = PreferencesHelper.loadPreferences(this)
 
-        setContent {
+            setContent {
             //var theme by remember { mutableStateOf(Theme.Light) }
             var isDrawerOpen by remember { mutableStateOf(false) }
             JobderTheme(colorScheme = SharedState.theme.value) {

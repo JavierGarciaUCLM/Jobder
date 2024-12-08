@@ -10,7 +10,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,13 +23,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,19 +44,30 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Popup
 import androidx.core.content.ContextCompat.startActivity
 import com.example.jobder.Augmented_Reality_Activity
 import com.example.jobder.NewLoginScreen
 import com.example.jobder.R
 import com.example.jobder.SharedState
+import com.google.ar.sceneform.CameraNode
 import io.github.sceneview.Scene
+import io.github.sceneview.SceneView
+import io.github.sceneview.ar.Scene
 import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.node.Node
+import io.github.sceneview.utils.TAG
+import kotlinx.coroutines.launch
 
 // Define los posibles estados de la tarjeta
 enum class SwipeDirection {
     DEFAULT, ACCEPTED, REJECTED
+}
+object SharedStatePopUp {
+    var text_i_want_to_show = mutableStateOf("")
+    var description = mutableStateOf("")
+    var position = mutableStateOf(Position(0f,0f,0f))
 }
 
 // Tarjeta individual deslizante
@@ -62,6 +78,7 @@ fun SwipeableCard(
     onSwipeRight: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     // Variable para el desplazamiento de la tarjeta
     var offsetX by remember { mutableStateOf(0f) }
     val swipeThreshold = 20f // Reducir el umbral para detectar el gesto de deslizamiento
@@ -285,8 +302,9 @@ fun SwipeableCard(
         ){
             IconButton(
                 onClick = {
-//                    val intent = Intent(LocalContext.current, Augmented_Reality_Activity::class.java)
-//                    startActivity(intent)
+                    val intent = Intent(context, Augmented_Reality_Activity::class.java)
+                    context.startActivity(intent)
+                    //ModelScreen()
                 },
                 modifier = Modifier.size(50.dp)
             ) {
@@ -353,23 +371,107 @@ fun SwipeableCard(
 
 }
 @Composable
-fun ModelScreen(){
+fun ModelScreen() {
     val context = LocalContext.current
-    val nodes = remember{
-        mutableListOf<Node>()
-    }
-    Scene(modifier = Modifier.fillMaxSize(),nodes=nodes,onCreate={
-        val model = ModelNode()
-        model.loadModelGlbAsync(
-            context = context,
-            glbFileLocation = "models/oficina.glb",
-            autoAnimate = true,
-            scaleToUnits = 0.5f,
-            centerOrigin = Position(0.0f,0.0f,0.0f),
-            onError = {
-                Log.e("SceneView",it.message.toString())
+    val nodes = remember { mutableListOf<Node>() }
+    val coroutineScope = rememberCoroutineScope()
+    var showPopup by remember { mutableStateOf(false) }
+    var sceneReference by remember { mutableStateOf<SceneView?>(null) }
+    var cameraNode by remember { mutableStateOf<CameraNode?>(null) }
 
-            })
-        nodes.add(model)
-    })
+    // Define las posiciones de la cámara
+    val cameraPositions = listOf(
+        Position(0f, 1.5f, 5f),  // Posición 1
+        Position(2f, 1.5f, 3f),  // Posición 2
+        Position(-2f, 1.5f, 3f)  // Posición 3
+    )
+
+    // Renderizar la escena
+    Scene(
+        modifier = Modifier.fillMaxSize(),
+        nodes = nodes,
+        onCreate = { scene ->
+            sceneReference = scene
+
+            // Acceder al nodo de cámara existente y configurarlo
+//            val camera = CameraNode(engine).apply {
+//                position = cameraPositions[0] // Posición inicial
+//                parent = scene // Establecer como parte de la escena
+//                //position = cameraPositions[0]
+//            }
+            //cameraNode = camera // Guardar referencia local para modificarla más adelante
+
+            // Cargar el modelo 3D
+            val model = ModelNode()
+            model.loadModelGlbAsync(
+                context = context,
+                glbFileLocation = "models/oficina.glb",
+                autoAnimate = true,
+                scaleToUnits = 0.5f,
+                centerOrigin = Position(0f, 0f, 0f), // Centrar el modelo
+                onError = { Log.e("SceneView", it.message.toString()) }
+            )
+            nodes.add(model)
+        }
+    )
+
+    // Interfaz de usuario: Botones para cambiar la posición de la cámara
+    Column {
+        // Espacio para la escena
+        Box(modifier = Modifier.weight(1f)) {
+            Scene(
+                modifier = Modifier.fillMaxSize(),
+                nodes = nodes
+            )
+        }
+
+        // Botones para mover la cámara
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            cameraPositions.forEachIndexed { index, position ->
+                Button(onClick = {
+                    sceneReference?.cameraNode.apply { this?.position = position }
+
+                    Log.d("Camera", "Camera position changed to: $position")
+                }) {
+                    Text(text = "Posición ${index + 1}")
+                }
+            }
+        }
+    }
+
+    // Mostrar el popup si es necesario
+    ShowPopup(showPopup = showPopup, onDismiss = { showPopup = false })
+}
+
+@Composable
+fun ShowPopup(showPopup: Boolean, onDismiss: () -> Unit) {
+    if (showPopup) {
+        Popup(
+            alignment = Alignment.Center,
+            onDismissRequest = onDismiss
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(200.dp)
+                    .background(Color.White)
+                    .border(1.dp, Color.Black)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)){
+                    Text(
+                        SharedStatePopUp.text_i_want_to_show.value,
+                        fontSize = 24.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                Text(
+                    text = SharedStatePopUp.description.value,
+                    fontSize = 10.sp
+                )}
+            }
+        }
+    }
 }
