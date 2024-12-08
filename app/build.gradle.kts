@@ -54,6 +54,8 @@ android {
 }
 
 dependencies {
+    // Supongo que esta es para el TalkBack
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.32.0")
     //librerías para reconocimiento de voz
     implementation ("androidx.compose.ui:ui:1.6.0")
     //implementation ("androidx.compose.material:material:1.6.0")
@@ -62,7 +64,7 @@ dependencies {
     implementation("io.github.sceneview:arsceneview:0.9.7")
 
     implementation ("androidx.activity:activity-compose:1.7.0")
-    implementation ("androidx.compose.ui:ui:1.5.0")
+    //implementation ("androidx.compose.ui:ui:1.5.0")
     implementation ("androidx.compose.material:material:1.5.0")
     implementation ("androidx.compose.ui:ui-tooling-preview:1.5.0")
     implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.6.0")

@@ -15,6 +15,7 @@ package com.example.jobder
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -28,6 +29,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -76,6 +79,7 @@ import com.google.mlkit.vision.face.FaceDetection
 import com.google.mlkit.vision.face.FaceDetectorOptions
 import ui.theme.JobderTheme
 import ui.theme.Theme
+import java.util.Locale
 import java.util.concurrent.Executors
 
 object SharedState{
@@ -90,7 +94,10 @@ object SharedState{
     var language = mutableStateOf("Español")
     var username = mutableStateOf(TextFieldValue(""))
     var password = mutableStateOf(TextFieldValue(""))
-
+//TalkBack
+    var currentIndex = mutableStateOf(0)
+var isSwipeProcessed = mutableStateOf(false)
+    lateinit var tts: TextToSpeech
     fun updateTheme() {
         SharedState.theme.value = when {
             // Protanopía
@@ -117,6 +124,29 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             println("Iniciando MainScreen.kt")
+// Initialize TextToSpeech
+        SharedState.tts = TextToSpeech(this) { status ->
+            if (status == TextToSpeech.SUCCESS) {
+                SharedState.tts.language = Locale("es", "ES")
+            }
+        }
+
+        //var currentIndex by remember { mutableStateOf(0) }
+        //val context = LocalContext.current
+        val languages = listOf("Español", "English", "Français")
+        val buttons = listOf("Botón", "Button", "Bouton")
+        val clicking_on = listOf("Haciendo clic en", "Clicking on", "en cliquant sur")
+        val selected_button = listOf("Botón seleccionado", "Selected Button", "Bouton sélectionné")
+        val languageLocales = listOf(Locale("es", "ES"), Locale.UK, Locale.FRENCH)
+
+        // Cambia el idioma del TTS según el índice actual
+        fun updateTTSLanguage(index: Int) {
+            val locale = languageLocales[index]
+            val result = SharedState.tts.setLanguage(locale)
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "Language not supported: $locale")
+            }
+        }
 
             appViewModel = ViewModelProvider(this)[AppViewModel::class.java]
             appViewModel.toggleIsNavigating()
@@ -129,15 +159,51 @@ class MainActivity : ComponentActivity() {
 
 
                 var context = LocalContext.current
+                // Recuerda el detector de gestos
+                val gestureModifier = Modifier.pointerInput(Unit) {
+                    detectTapGestures(
+                        onDoubleTap = {
+                            val buttonName = buttons.get(SharedState.currentIndex.value)+languages.get(SharedState.currentIndex.value)
+                            Log.d("Gesture", "Double Tap on $buttonName")
+
+                            SharedState.tts.speak(clicking_on.get(SharedState.currentIndex.value)+ buttonName, TextToSpeech.QUEUE_FLUSH, null, null)
+                            SharedState.language.value = languages.get(SharedState.currentIndex.value)
+                            val intent = Intent(context, LoginScreen::class.java)
+
+
+                            startActivity(intent)
+                        }
+                    )
+                }.pointerInput(Unit) {
+
+                    detectHorizontalDragGestures(
+                        onDragStart = {
+                            SharedState.isSwipeProcessed.value = false
+                        },onHorizontalDrag = { _, dragAmount ->
+                            if(!SharedState.isSwipeProcessed.value){
+                                if (dragAmount > 0f) {
+                                    SharedState.currentIndex.value = (SharedState.currentIndex.value + 1).mod(3)
+                                    updateTTSLanguage(SharedState.currentIndex.value)
+                                    SharedState.isSwipeProcessed.value = true
+                                    SharedState.tts.speak(selected_button.get(SharedState.currentIndex.value)+ languages[SharedState.currentIndex.value], TextToSpeech.QUEUE_FLUSH, null, null)
+
+                                } else {
+                                    SharedState.currentIndex.value = (SharedState.currentIndex.value - 1).mod(3)
+                                    updateTTSLanguage(SharedState.currentIndex.value)
+                                    SharedState.isSwipeProcessed.value = true
+                                    SharedState.tts.speak(selected_button.get(SharedState.currentIndex.value)+ languages[SharedState.currentIndex.value], TextToSpeech.QUEUE_FLUSH, null, null)
+
+                                }
+
+                            }},
+                        onDragEnd = {
+                            SharedState.isSwipeProcessed.value = false
+                        }
+                    )
+                }
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
                 val executor = Executors.newSingleThreadExecutor()
-                var selectedButtonIndex by remember { mutableStateOf(0) }
-                //var `SharedState.darkModeIsChecked` by remember { mutableStateOf(false) }
-                //var protanopiaIsChecked by remember { mutableStateOf(false) }
-                //var deuteranopiaIsChecked by remember { mutableStateOf(false) }
-                //var tritanopiaIsChecked by remember { mutableStateOf(false) }
-                //var selectedLanguage = listOf("English","Français","Español")//by remember {mutableStateOf("")}
-                // Definir colores
+
                 val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
 
 
@@ -184,7 +250,6 @@ class MainActivity : ComponentActivity() {
                     )
 
 
-                    //Box(modifier = Modifier.fillMaxSize()) {
 
 
                     Box(
@@ -194,7 +259,9 @@ class MainActivity : ComponentActivity() {
                                 detectTransformGestures { _, _, zoom, _ ->
                                     SharedState.scale.value = (SharedState.scale.value * zoom).coerceIn(SharedState.minScale, SharedState.maxScale)
                                 }
-                            },
+                            }
+                            .background(Color.LightGray)
+                            .then(gestureModifier),
                         contentAlignment = Alignment.Center
                     ) {
 
@@ -213,7 +280,7 @@ class MainActivity : ComponentActivity() {
                                     .width((200 * SharedState.scale.value).dp)
                                     .height((50 * SharedState.scale.value).dp)
                                     .semantics { contentDescription = "Select English language" },
-                                colors =if (selectedButtonIndex == 0) {
+                                colors =if (SharedState.currentIndex.value == 0) {
                                     ButtonColors(
                                     SharedState.theme.value.primary,
                                     SharedState.theme.value.onPrimary,
@@ -225,7 +292,7 @@ class MainActivity : ComponentActivity() {
                                     SharedState.theme.value.secondaryContainer,
                                     SharedState.theme.value.onSecondary
                                 )},
-                                border = if (selectedButtonIndex == 0) BorderStroke(
+                                border = if (SharedState.currentIndex.value == 0) BorderStroke(
                                     2.dp,
                                     Color.Blue
                                 ) else null,
@@ -251,7 +318,7 @@ class MainActivity : ComponentActivity() {
                                     .height((50 * SharedState.scale.value).dp)
 
                                     .semantics { contentDescription = "Select French language" },
-                                colors = if (selectedButtonIndex == 1) {
+                                colors = if (SharedState.currentIndex.value == 1) {
                                     ButtonColors(
                                         SharedState.theme.value.primary,
                                         SharedState.theme.value.onPrimary,
@@ -263,14 +330,13 @@ class MainActivity : ComponentActivity() {
                                     SharedState.theme.value.secondaryContainer,
                                     SharedState.theme.value.onSecondary
                                 )},
-                                border = if (selectedButtonIndex == 1) BorderStroke(
+                                border = if (SharedState.currentIndex.value == 1) BorderStroke(
                                     2.dp,
                                     Color.Blue
                                 ) else null,
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text("Français", fontSize = (16 * SharedState.scale.value).sp)//, color = theme.primaryContainer)
-                                //selectedLanguage = "Français"
                             }
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
@@ -287,7 +353,7 @@ class MainActivity : ComponentActivity() {
                                     .width((200 * SharedState.scale.value).dp)
                                     .height((50 * SharedState.scale.value).dp)
                                     .semantics { contentDescription = "Select Spanish language" },
-                                colors = if (selectedButtonIndex == 2) {
+                                colors = if (SharedState.currentIndex.value == 2) {
                                     ButtonColors(
                                         SharedState.theme.value.primary,
                                         SharedState.theme.value.onPrimary,
@@ -299,7 +365,7 @@ class MainActivity : ComponentActivity() {
                                     SharedState.theme.value.secondaryContainer,
                                     SharedState.theme.value.onSecondary
                                 )},
-                                border = if (selectedButtonIndex == 2) BorderStroke(
+                                border = if (SharedState.currentIndex.value == 2) BorderStroke(
                                     2.dp,
                                     Color.Blue
                                 ) else null,
@@ -307,7 +373,6 @@ class MainActivity : ComponentActivity() {
 
                                 ) {
                                 Text("Español", fontSize = (16 * SharedState.scale.value).sp)//, color = theme.primaryContainer)
-                                //selectedLanguage = "Español"
                             }
                         }
                     }
@@ -325,15 +390,9 @@ class MainActivity : ComponentActivity() {
                     }
                     IconButton(
                         onClick = {
-                            //isDarkMode = !isDarkMode
                             SharedState.darkModeIsChecked.value = !SharedState.darkModeIsChecked.value
                             SharedState.updateTheme()
-                            //theme = Theme.Dark
-//                            PreferencesHelper.savePreferences(
-//                                context,
-//                                darkModeIsChecked,
-//                                language = language
-//                            )
+
 
                         }, // Cambia el modo oscuro
                         modifier = Modifier
@@ -506,15 +565,15 @@ class MainActivity : ComponentActivity() {
                                     imageProxy
                                 ) { blinkDetected, smileDetected ->
                                     if (blinkDetected) {
-                                        selectedButtonIndex = (selectedButtonIndex + 1) % 3
+                                        SharedState.currentIndex.value = (SharedState.currentIndex.value + 1) % 3
                                     }
                                     if (smileDetected && !appViewModel.isNavigating.value) {
                                         appViewModel.toggleIsNavigating()
-                                        if (selectedButtonIndex == 0) {
+                                        if (SharedState.currentIndex.value == 0) {
 
                                                 SharedState.language.value = "English"
 
-                                        } else if (selectedButtonIndex == 1) {
+                                        } else if (SharedState.currentIndex.value == 1) {
 
                                                 SharedState.language.value = "Français"
 
@@ -605,162 +664,6 @@ class MainActivity : ComponentActivity() {
         MainActivity()
     }
 }
-          //  JobderTheme {
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                    Greeting(
-//                        name = "Android",
-//                        modifier = Modifier.padding(innerPadding)
-//                    )
-//                }
-                //val miClase = TTSActivity()
-                //miClase.speak("HOLA")
-                // Inicializa TTS
-              //  MainScreen()
-//                tts = TextToSpeech(this, this)
-//                //SpeakButton { speak("Hola, ¿cómo estás?") }
-//                MyApp(
-//                    buttonLabels = buttonLabels,
-//                    currentIndex = currentIndex,
-//                    onButtonClick = { index -> speak(buttonLabels[index]) },
-//                    onSwipeLeft = { navigateToPreviousButton() },
-//                    onSwipeRight = { navigateToNextButton() },
-//                    onDoubleTap = { performButtonClick() }
-//                )
-                //SwipeableCardsScreen()
-          //  }
-
-
-
-//    private fun navigateToPreviousButton() {
-//        if (currentIndex > 0) {
-//            currentIndex--
-//            speak(buttonLabels[currentIndex])
-//        }
-//    }
-//    private fun navigateToNextButton() {
-//        if (currentIndex < buttonLabels.size - 1) {
-//            currentIndex++
-//            speak(buttonLabels[currentIndex])
-//        }
-//    }
-//    private fun performButtonClick() {
-//        speak("Haciendo clic en ${buttonLabels[currentIndex]}")
-//    }
-//    override fun onInit(status: Int) {
-//        if (status == TextToSpeech.SUCCESS) {
-//            // Configurar el idioma
-//            val result = tts.setLanguage(Locale("es", "ES"))
-//            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-//                Log.e("TTS", "Idioma no soportado")
-//            } else {
-//                // Hacer que el dispositivo hable
-//                //speak("Hola, ¿cómo estás?")
-//            }
-//        } else {
-//            Log.e("TTS", "Inicialización fallida")
-//        }
-//    }
-//
-//    private fun speak(text: String) {
-//        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
-//    }
-//
-//    override fun onDestroy() {
-//        if (this::tts.isInitialized) {
-//            tts.stop()
-//            tts.shutdown()
-//        }
-//        super.onDestroy()
-//    }
-//    /*@Composable
-//    fun SpeakButton(onClick: () -> Unit) {
-//        Button(onClick = onClick) {
-//            Text("Hablar")
-//        }
-//    }*/
-//}
-//@Composable
-//fun MyApp(
-//    buttonLabels: List<String>,
-//    currentIndex: Int,
-//    onButtonClick: (Int) -> Unit,
-//    onSwipeLeft: () -> Unit,
-//    onSwipeRight: () -> Unit,
-//    onDoubleTap: () -> Unit
-//) {
-//    val swipeThreshold = 1000f // Ajusta este valor según tus necesidades
-//    val animationDuration = 500 // Duración de la animación en milisegundos
-//    val swipeTimeout = 1000L // Tiempo en milisegundos antes de deshabilitar el swipe
-//
-//    var offsetX by remember { mutableStateOf(0f) }
-//    var swipeEnabled by remember { mutableStateOf(true) }
-//
-//    Box(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .pointerInput(Unit) {
-//                detectTapGestures(
-//                    onDoubleTap = { onDoubleTap() }
-//                )
-//            }
-//            .pointerInput(Unit) {
-//                detectTransformGestures { _, pan, _, _ ->
-//                    if (swipeEnabled) {
-//
-//                           if( pan.x > 0 ) {
-//                                offsetX = 1f // Valor para swipe a la derecha
-//                                onSwipeRight()
-//                                swipeEnabled = false
-//                               Log.d("Swipe", "Swipe a la derecha detectado")
-//                            }else {
-//
-//                                   offsetX = -1f // Valor para swipe a la izquierda
-//                                   onSwipeLeft()
-//                                   swipeEnabled = false
-//                               Log.d("Swipe", "Swipe a la izquierda detectado")
-//                           }
-//
-//                    }
-//                }
-//            },
-//        contentAlignment = Alignment.Center
-//    ) {
-//        Column(
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center
-//        ) {
-//            buttonLabels.forEachIndexed { index, label ->
-//                Button(
-//                    onClick = { onButtonClick(index) },
-//                    modifier = Modifier
-//                        .padding(8.dp)
-//                        .then(
-//                            if (index == currentIndex) {
-//                                Modifier.border(2.dp, Color.Blue)
-//                            } else {
-//                                Modifier
-//                            }
-//                        )
-//                ) {
-//                    Text(label)
-//                }
-//            }
-//        }
-//    }
-//    val animatedOffsetX by animateFloatAsState(
-//        targetValue = offsetX,
-//        animationSpec = tween(durationMillis = animationDuration)
-//    )
-//    // Usa animatedOffsetX para mover tus botones
-//
-//// Restablecer swipeEnabled después de swipeTimeout
-//    LaunchedEffect(swipeEnabled) {
-//        if (!swipeEnabled) {
-//            delay(swipeTimeout)
-//            swipeEnabled = true
-//            Log.d("Swipe", "Swipe habilitado nuevamente")
-//        }
-//    }
 
 
 
