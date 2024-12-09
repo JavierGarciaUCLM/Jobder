@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-
+import ui.screens.swipe.ModelScreen
 
 class Augmented_Reality_Activity:ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,7 +16,7 @@ class Augmented_Reality_Activity:ComponentActivity() {
         enableEdgeToEdge()
         setContent {
 
-
+                    ModelScreen()
 
         }
     }

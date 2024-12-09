@@ -376,3 +376,122 @@ fun SwipeableCard(
     }
 
 }
+@Composable
+fun ModelScreen() {
+    val context = LocalContext.current
+    val nodes = remember { mutableListOf<Node>() }
+    val coroutineScope = rememberCoroutineScope()
+    var showPopup by remember { mutableStateOf(false) }
+
+    // Define las posiciones de la cámara
+    val cameraPositions = listOf(
+        Position(0f, 1.5f, 5f), // Posición 1
+        Position(2f, 1.5f, 3f), // Posición 2
+        Position(-2f, 1.5f, 3f), // Posición 3
+        Position(0f, 2f, 1f) // Posición 4
+    )
+
+    // Estado actual de la cámara
+    var currentCameraPosition by remember { mutableStateOf(cameraPositions[0]) }
+
+    Scene(modifier = Modifier.fillMaxSize(), nodes = nodes,
+        //cameraPosition = currentCameraPosition,
+        onCreate = {
+        val model = ModelNode()
+        model.loadModelGlbAsync(
+            context = context,
+            glbFileLocation = "models/oficina.glb",
+            autoAnimate = true,
+            scaleToUnits = 0.5f,
+            centerOrigin = Position(0.0f, 0.0f, 0.0f),
+            onError = {
+                Log.e("SceneView", it.message.toString())
+            }
+        )
+        model.onTap = { hitTestResult, renderable ->
+            coroutineScope.launch {
+                showPopup = true
+                SharedStatePopUp.text_i_want_to_show.value = when (renderable) {
+                    262 -> "Monitor"
+                    163 -> "Pencil Suitcase"
+                    282 -> "iPad"
+                    242 -> "Window"
+                    274 -> "Agus"
+                    450 -> "OhhYeah"
+                    else -> ""
+                }
+                SharedStatePopUp.description.value = when (renderable) {
+                    262 -> "27-inch IPS digital monitor..."
+                    163 -> "The black pencil case..."
+                    282 -> "The iPad is a brand..."
+                    242 -> "Window film with blinds pattern..."
+                    else -> ""
+                }
+                Log.e("Object TAPPED!", "$renderable")
+            }
+        }
+
+        nodes.add(model)
+    })
+
+    // UI: Incluye los botones para mover la cámara
+    Column {
+        // Espacio para la escena
+        Box(modifier = Modifier.weight(1f)) {
+            Scene(
+                modifier = Modifier.fillMaxSize(),
+                nodes = nodes//,
+               // cameraPosition = currentCameraPosition
+            )
+        }
+
+        // Botones para cambiar la posición de la cámara
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            cameraPositions.forEachIndexed { index, position ->
+                Button(onClick = {
+                    currentCameraPosition = position
+                }) {
+                    Text(text = "Posición ${index + 1}")
+                }
+            }
+        }
+    }
+
+    // Popup
+    ShowPopup(showPopup = showPopup, onDismiss = { showPopup = false })
+}
+
+@Composable
+fun ShowPopup(showPopup: Boolean, onDismiss: () -> Unit) {
+    if (showPopup) {
+        Popup(
+            alignment = Alignment.Center,
+            onDismissRequest = onDismiss
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(200.dp)
+                    .background(Color.White)
+                    .border(1.dp, Color.Black)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)){
+                    Text(
+                        text = SharedStatePopUp.text_i_want_to_show.value,
+                        fontSize = 24.sp,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                Text(
+                    text = SharedStatePopUp.description.value,
+                    fontSize = 10.sp
+                )}
+                Log.e("Título",SharedStatePopUp.text_i_want_to_show.value)
+                Log.e("Cuerpo",SharedStatePopUp.description.value)
+            }
+        }
+    }
+}
