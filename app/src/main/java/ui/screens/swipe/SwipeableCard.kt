@@ -52,13 +52,19 @@ import com.example.jobder.R
 import com.example.jobder.SharedState
 import com.google.ar.sceneform.CameraNode
 import io.github.sceneview.Scene
+//import io.github.sceneview.Scene
 import io.github.sceneview.SceneView
-import io.github.sceneview.ar.Scene
 import io.github.sceneview.math.Position
 import io.github.sceneview.node.ModelNode
 import io.github.sceneview.node.Node
-import io.github.sceneview.utils.TAG
 import kotlinx.coroutines.launch
+
+//import io.github.sceneview.ar.Scene
+//import io.github.sceneview.math.Position
+//import io.github.sceneview.node.ModelNode
+//import io.github.sceneview.node.Node
+//import io.github.sceneview.utils.TAG
+//import kotlinx.coroutines.launch
 
 // Define los posibles estados de la tarjeta
 enum class SwipeDirection {
@@ -376,56 +382,70 @@ fun ModelScreen() {
     val nodes = remember { mutableListOf<Node>() }
     val coroutineScope = rememberCoroutineScope()
     var showPopup by remember { mutableStateOf(false) }
-    var sceneReference by remember { mutableStateOf<SceneView?>(null) }
-    var cameraNode by remember { mutableStateOf<CameraNode?>(null) }
 
     // Define las posiciones de la cámara
     val cameraPositions = listOf(
-        Position(0f, 1.5f, 5f),  // Posición 1
-        Position(2f, 1.5f, 3f),  // Posición 2
-        Position(-2f, 1.5f, 3f)  // Posición 3
+        Position(0f, 1.5f, 5f), // Posición 1
+        Position(2f, 1.5f, 3f), // Posición 2
+        Position(-2f, 1.5f, 3f), // Posición 3
+        Position(0f, 2f, 1f) // Posición 4
     )
 
-    // Renderizar la escena
-    Scene(
-        modifier = Modifier.fillMaxSize(),
-        nodes = nodes,
-        onCreate = { scene ->
-            sceneReference = scene
+    // Estado actual de la cámara
+    var currentCameraPosition by remember { mutableStateOf(cameraPositions[0]) }
 
-            // Acceder al nodo de cámara existente y configurarlo
-//            val camera = CameraNode(engine).apply {
-//                position = cameraPositions[0] // Posición inicial
-//                parent = scene // Establecer como parte de la escena
-//                //position = cameraPositions[0]
-//            }
-            //cameraNode = camera // Guardar referencia local para modificarla más adelante
-
-            // Cargar el modelo 3D
-            val model = ModelNode()
-            model.loadModelGlbAsync(
-                context = context,
-                glbFileLocation = "models/oficina.glb",
-                autoAnimate = true,
-                scaleToUnits = 0.5f,
-                centerOrigin = Position(0f, 0f, 0f), // Centrar el modelo
-                onError = { Log.e("SceneView", it.message.toString()) }
-            )
-            nodes.add(model)
+    Scene(modifier = Modifier.fillMaxSize(), nodes = nodes,
+        //cameraPosition = currentCameraPosition,
+        onCreate = {
+        val model = ModelNode()
+        model.loadModelGlbAsync(
+            context = context,
+            glbFileLocation = "models/oficina.glb",
+            autoAnimate = true,
+            scaleToUnits = 0.5f,
+            centerOrigin = Position(0.0f, 0.0f, 0.0f),
+            onError = {
+                Log.e("SceneView", it.message.toString())
+            }
+        )
+        model.onTap = { hitTestResult, renderable ->
+            coroutineScope.launch {
+                showPopup = true
+                SharedStatePopUp.text_i_want_to_show.value = when (renderable) {
+                    262 -> "Monitor"
+                    163 -> "Pencil Suitcase"
+                    282 -> "iPad"
+                    242 -> "Window"
+                    274 -> "Agus"
+                    450 -> "OhhYeah"
+                    else -> ""
+                }
+                SharedStatePopUp.description.value = when (renderable) {
+                    262 -> "27-inch IPS digital monitor..."
+                    163 -> "The black pencil case..."
+                    282 -> "The iPad is a brand..."
+                    242 -> "Window film with blinds pattern..."
+                    else -> ""
+                }
+                Log.e("Object TAPPED!", "$renderable")
+            }
         }
-    )
 
-    // Interfaz de usuario: Botones para cambiar la posición de la cámara
+        nodes.add(model)
+    })
+
+    // UI: Incluye los botones para mover la cámara
     Column {
         // Espacio para la escena
         Box(modifier = Modifier.weight(1f)) {
             Scene(
                 modifier = Modifier.fillMaxSize(),
-                nodes = nodes
+                nodes = nodes//,
+               // cameraPosition = currentCameraPosition
             )
         }
 
-        // Botones para mover la cámara
+        // Botones para cambiar la posición de la cámara
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -434,9 +454,7 @@ fun ModelScreen() {
         ) {
             cameraPositions.forEachIndexed { index, position ->
                 Button(onClick = {
-                    sceneReference?.cameraNode.apply { this?.position = position }
-
-                    Log.d("Camera", "Camera position changed to: $position")
+                    currentCameraPosition = position
                 }) {
                     Text(text = "Posición ${index + 1}")
                 }
@@ -444,7 +462,7 @@ fun ModelScreen() {
         }
     }
 
-    // Mostrar el popup si es necesario
+    // Popup
     ShowPopup(showPopup = showPopup, onDismiss = { showPopup = false })
 }
 
@@ -463,7 +481,7 @@ fun ShowPopup(showPopup: Boolean, onDismiss: () -> Unit) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)){
                     Text(
-                        SharedStatePopUp.text_i_want_to_show.value,
+                        text = SharedStatePopUp.text_i_want_to_show.value,
                         fontSize = 24.sp,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -471,6 +489,8 @@ fun ShowPopup(showPopup: Boolean, onDismiss: () -> Unit) {
                     text = SharedStatePopUp.description.value,
                     fontSize = 10.sp
                 )}
+                Log.e("Título",SharedStatePopUp.text_i_want_to_show.value)
+                Log.e("Cuerpo",SharedStatePopUp.description.value)
             }
         }
     }
