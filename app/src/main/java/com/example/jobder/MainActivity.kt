@@ -32,13 +32,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -146,183 +147,84 @@ class MainActivity : ComponentActivity() {
                 val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
                 val executor = Executors.newSingleThreadExecutor()
 
-                val backgroundColor = Color(0xFFE0F7FA) // Color azul claro para el fondo
+            val shakeDetector = rememberUpdatedState(ShakeDetector(
+                context = LocalContext.current,
+                onShakeStart = {
+                    showSnowfall = true
+                    generateSnowflakes(snowflakes, 50) // Genera 50 copos de nieve al detectar una sacudida
+                },
+                onShakeStop = { showSnowfall = false }
+            ))
 
-
-                val backgroundModifier = if (SharedState.darkModeIsChecked.value) {
-                    Modifier.fillMaxSize().background(Color.Gray)
-                } else {
-                    Modifier.fillMaxSize().background(backgroundColor)
+            DisposableEffect(Unit) {
+                onDispose {
+                    shakeDetector.value.unregister()
                 }
+            }
+            Box(modifier = Modifier.fillMaxSize()) {
 
-                Box(modifier = backgroundModifier) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ohyeah),
-                        contentDescription = null,
-                        alpha = 0.4f,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-//                     Rectángulo superpuesto
-                    Box(
+                Image(
+                    painter = painterResource(id = R.drawable.ohyeah),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+                Column(
+                    modifier = Modifier
+                        //.fillMaxSize()
+                        .align(Alignment.Center)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Button(
+                        onClick = {
+                            //onLanguageSelected("English")
+                            //navController.navigate("login_screen")
+                        },
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                if (SharedState.darkModeIsChecked.value) Color.Black.copy(alpha = 0.5f)
-                                else Color.White.copy(
-                                    alpha = 0.5f
-                                )
-                            )
-                    )
-
-                    // Logo de la app en la parte superior
-                    val logo = if (SharedState.darkModeIsChecked.value) {
-                        painterResource(id = R.mipmap.ic_launcher_foreground) // Logo en modo oscuro
-                    } else {
-                        painterResource(id = R.mipmap.img) // Logo en modo claro
-                    }
-                    Image(
-                        painter = logo,
-
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(100.dp)
-                            .align(Alignment.TopCenter)
-                            .padding(top = 50.dp)
-                    )
-
-
-
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(Unit) {
-                                detectTransformGestures { _, _, zoom, _ ->
-                                    SharedState.scale.value = (SharedState.scale.value * zoom).coerceIn(SharedState.minScale, SharedState.maxScale)
-                                }
-                            }
-
-                            .then(gestureModifier),
-                        contentAlignment = Alignment.Center
+                            .padding(8.dp)
+                            .semantics { contentDescription = "Select English language" },
+                        border = if (selectedButtonIndex == 0) BorderStroke(
+                            2.dp,
+                            Color.Blue
+                        ) else null,
+                        shape = RoundedCornerShape(8.dp)
                     ) {
-
-                        Column {
-                            Button(
-                                onClick = {
-
-                                    SharedState.language.value = "English"
-                                    val intent = Intent(context, LoginScreen::class.java)
-
-
-                                    startActivity(intent)
-                                },
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .width((200 * SharedState.scale.value).dp)
-                                    .height((50 * SharedState.scale.value).dp)
-                                    .semantics { contentDescription = "Select English language" },
-                                colors =if (SharedState.currentIndex.value == 0) {
-                                    ButtonColors(
-                                    SharedState.theme.value.primary,
-                                    SharedState.theme.value.onPrimary,
-                                    SharedState.theme.value.secondaryContainer,
-                                    SharedState.theme.value.onSecondary
-                                )}else{ButtonColors(
-                                    SharedState.theme.value.secondary,
-                                    SharedState.theme.value.onSecondary,
-                                    SharedState.theme.value.secondaryContainer,
-                                    SharedState.theme.value.onSecondary
-                                )},
-                                border = if (SharedState.currentIndex.value == 0) BorderStroke(
-                                    2.dp,
-                                    Color.Blue
-                                ) else null,
-                                shape = RoundedCornerShape(8.dp)
-
-                            ) {
-                                Text("English", fontSize = (16 * SharedState.scale.value).sp)//,color = theme.primaryContainer)
-                                //selectedLanguage = "English"
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-
-                                    SharedState.language.value ="Français"
-                                    val intent = Intent(context, LoginScreen::class.java)
-
-
-                                    startActivity(intent)
-                                },
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .width((200 * SharedState.scale.value).dp)
-                                    .height((50 * SharedState.scale.value).dp)
-
-                                    .semantics { contentDescription = "Select French language" },
-                                colors = if (SharedState.currentIndex.value == 1) {
-                                    ButtonColors(
-                                        SharedState.theme.value.primary,
-                                        SharedState.theme.value.onPrimary,
-                                        SharedState.theme.value.secondaryContainer,
-                                        SharedState.theme.value.onSecondary
-                                    )}else{ButtonColors(
-                                    SharedState.theme.value.secondary,
-                                    SharedState.theme.value.onSecondary,
-                                    SharedState.theme.value.secondaryContainer,
-                                    SharedState.theme.value.onSecondary
-                                )},
-                                border = if (SharedState.currentIndex.value == 1) BorderStroke(
-                                    2.dp,
-                                    Color.Blue
-                                ) else null,
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text("Français", fontSize = (16 * SharedState.scale.value).sp)//, color = theme.primaryContainer)
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(
-                                onClick = {
-
-                                    SharedState.language.value = "Español"
-                                    val intent = Intent(context, LoginScreen::class.java)
-
-
-                                    startActivity(intent)
-                                },
-                                modifier = Modifier
-                                    .padding(8.dp)
-                                    .width((200 * SharedState.scale.value).dp)
-                                    .height((50 * SharedState.scale.value).dp)
-                                    .semantics { contentDescription = "Select Spanish language" },
-                                colors = if (SharedState.currentIndex.value == 2) {
-                                    ButtonColors(
-                                        SharedState.theme.value.primary,
-                                        SharedState.theme.value.onPrimary,
-                                        SharedState.theme.value.secondaryContainer,
-                                        SharedState.theme.value.onSecondary
-                                    )}else{ButtonColors(
-                                    SharedState.theme.value.secondary,
-                                    SharedState.theme.value.onSecondary,
-                                    SharedState.theme.value.secondaryContainer,
-                                    SharedState.theme.value.onSecondary
-                                )},
-                                border = if (SharedState.currentIndex.value == 2) BorderStroke(
-                                    2.dp,
-                                    Color.Blue
-                                ) else null,
-                                shape = RoundedCornerShape(8.dp),
-
-                                ) {
-                                Text("Español", fontSize = (16 * SharedState.scale.value).sp)//, color = theme.primaryContainer)
-                            }
-                        }
+                        Text("English")
+                        //selectedLanguage = "English"
                     }
-                    IconButton(
-                        onClick = { isDrawerOpen = true },
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            //onLanguageSelected("Français")
+                            //navController.navigate("login_screen")
+                        },
                         modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(16.dp)
+                            .padding(8.dp)
+                            .semantics { contentDescription = "Select French language" },
+                        border = if (selectedButtonIndex == 1) BorderStroke(
+                            2.dp,
+                            Color.Blue
+                        ) else null,
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Français")
+                        //selectedLanguage = "Français"
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(
+                        onClick = {
+                            //onLanguageSelected("Español")
+                            //navController.navigate("login_screen")
+                        },
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .semantics { contentDescription = "Select Spanish language" },
+                        border = if (selectedButtonIndex == 2) BorderStroke(
+                            2.dp,
+                            Color.Blue
+                        ) else null,
+                        shape = RoundedCornerShape(8.dp)
                     ) {
                         Text("Español")
                         //selectedLanguage = "Español"

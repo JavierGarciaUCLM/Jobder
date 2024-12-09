@@ -38,17 +38,19 @@ fun LockScreen(activity: FragmentActivity) {
     //scaffoldState = scaffoldState,
     //content = {
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Button(onClick = { authenticateWithFingerprint(activity) }) {
-            Text("Desbloquear con Huella Dactilar")
-        }
-    }
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize()
+//            .padding(16.dp),
+//        verticalArrangement = Arrangement.Center,
+//        horizontalAlignment = Alignment.CenterHorizontally
+    //) {
+        //Button(onClick = {
+            authenticateWithFingerprint(activity)
+        //}) {
+          //  Text("Desbloquear con Huella Dactilar")
+        //}
+    //}
     //}
     //)
 }
