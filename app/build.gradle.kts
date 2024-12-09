@@ -54,6 +54,13 @@ android {
 }
 
 dependencies {
+    //NFC
+    //implementation ("androidx.compose.ui:ui:1.0.5")
+    implementation ("androidx.compose.material3:material3:1.0.0-alpha01")
+    implementation ("androidx.activity:activity-compose:1.3.1")
+    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
+
+
     // Fingerprint
     implementation ("androidx.biometric:biometric:1.2.0-alpha04")
     // Supongo que esta es para el TalkBack
@@ -76,6 +83,7 @@ dependencies {
     implementation ("androidx.camera:camera-core:1.1.0")
     implementation ("androidx.camera:camera-lifecycle:1.1.0")
     implementation ("androidx.camera:camera-view:1.0.0-alpha31")
+    // Facila recognition mlkit from google works really well, trust me
     implementation ("com.google.mlkit:face-detection:16.1.5")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
