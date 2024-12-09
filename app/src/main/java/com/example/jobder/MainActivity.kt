@@ -33,10 +33,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,7 +74,26 @@ class MainActivity : ComponentActivity() {
             val executor = Executors.newSingleThreadExecutor()
             var selectedButtonIndex by remember { mutableStateOf(0) }
             var selectedLanguage = listOf("English","Français","Español")//by remember {mutableStateOf("")}
+            //SNOWFALL
+            var showSnowfall by remember { mutableStateOf(false) }
+            val snowflakes = remember { mutableStateListOf<Snowflake>() }
+
+            val shakeDetector = rememberUpdatedState(ShakeDetector(
+                context = LocalContext.current,
+                onShakeStart = {
+                    showSnowfall = true
+                    generateSnowflakes(snowflakes, 50) // Genera 50 copos de nieve al detectar una sacudida
+                },
+                onShakeStop = { showSnowfall = false }
+            ))
+
+            DisposableEffect(Unit) {
+                onDispose {
+                    shakeDetector.value.unregister()
+                }
+            }
             Box(modifier = Modifier.fillMaxSize()) {
+
                 Image(
                     painter = painterResource(id = R.drawable.ohyeah),
                     contentDescription = null,
@@ -139,6 +161,7 @@ class MainActivity : ComponentActivity() {
                         //selectedLanguage = "Español"
                     }
                 }
+                Snowfall(snowflakes)
             }
             cameraProviderFuture.addListener({
                 val cameraProvider = cameraProviderFuture.get()
