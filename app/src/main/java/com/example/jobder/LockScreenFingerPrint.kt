@@ -1,28 +1,22 @@
 package com.example.jobder
-
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.fragment.app.FragmentActivity
 
-class LockScreenFingerPrint: FragmentActivity(){
+class LockScreenFingerPrint : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent{
@@ -37,26 +31,23 @@ fun LockScreen(activity: FragmentActivity) {
     //Scaffold(
     //scaffoldState = scaffoldState,
     //content = {
-
 //    Column(
 //        modifier = Modifier
 //            .fillMaxSize()
 //            .padding(16.dp),
 //        verticalArrangement = Arrangement.Center,
 //        horizontalAlignment = Alignment.CenterHorizontally
-    //) {
-        //Button(onClick = {
+//    ) {
+//        Button(onClick = {
             authenticateWithFingerprint(activity)
-        //}) {
-          //  Text("Desbloquear con Huella Dactilar")
-        //}
-    //}
+//            Text("Desbloquear con Huella Dactilar")
+//        }
+//    }
     //}
     //)
 }
 
 fun authenticateWithFingerprint(activity: FragmentActivity) {
-
     val biometricManager = BiometricManager.from(activity)
     when (biometricManager.canAuthenticate()) {
         BiometricManager.BIOMETRIC_SUCCESS -> {
