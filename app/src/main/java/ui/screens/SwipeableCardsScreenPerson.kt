@@ -2,6 +2,7 @@ package ui.screens
 
 
 
+import android.content.Intent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
@@ -53,11 +55,13 @@ fun SwipeableCardsScreenPerson() {
         modifier = Modifier.fillMaxSize()
     ) {
         if (personas.isNotEmpty()) {
-            SwipeableCard(
-                item = personas.first(),
-                onSwipeLeft = { coroutineScope.launch { removePersona() } },
-                onSwipeRight = { coroutineScope.launch { removePersona() } }
-            )
+            val context = LocalContext.current
+            SharedSwipes.item = personas.first()
+            SharedSwipes.isPersona = true
+            val intent = Intent(context, SwipeableCard::class.java)
+
+
+            context.startActivity(intent)
         } else {
             //Text(text = "No more people", fontSize = 24.sp)
             Image(
