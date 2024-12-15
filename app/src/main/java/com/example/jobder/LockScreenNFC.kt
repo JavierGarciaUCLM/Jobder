@@ -19,11 +19,14 @@ import android.provider.Settings
 import android.nfc.Tag
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 object SharedStateLock{
     lateinit var activity: ComponentActivity
@@ -99,7 +102,14 @@ fun NFCReaderScreen(nfcAdapter: NfcAdapter?) {
                 Text("Abrir Configuración NFC")
             }
         } else {
-            Text("Aproxime una tarjeta NFC para leerla", style = MaterialTheme.typography.headlineLarge)
+            Image(
+                painter = painterResource(id = R.drawable.nfc),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            )
+            //Text("Aproxime una tarjeta NFC para leerla", style = MaterialTheme.typography.headlineLarge)
         }
     }
     //}
